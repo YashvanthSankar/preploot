@@ -1,6 +1,8 @@
 "use client"
 
-import { Github, Twitter, Linkedin, Mail } from "lucide-react"
+import React from 'react';
+import Link from 'next/link';
+import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -52,10 +54,10 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-3">Quick Links</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Home</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Exams</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Leaderboard</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Dashboard</a></li>
+              <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
+              <li><Link href="/exams" className="hover:text-primary transition-colors">Exams</Link></li>
+              <li><Link href="/leaderboard" className="hover:text-primary transition-colors">Leaderboard</Link></li>
+              <li><Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
             </ul>
           </div>
 
@@ -63,10 +65,10 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-3">Support</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Contact Us</a></li>
+              <li><Link href="/help" className="hover:text-primary transition-colors">Help Center</Link></li>
+              <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
             </ul>
           </div>
         </div>
