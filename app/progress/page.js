@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
-import { Header } from '@/components/header';
+import { GamingNavigation } from '@/components/gaming-navigation';
+import { GamingButton } from '@/components/gaming-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProgressTracker } from '@/components/progress-tracker';
 import { SubjectProgress } from '@/components/subject-progress';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -72,7 +72,7 @@ export default function ProgressDashboard() {
 
   return (
     <div>
-      <Header />
+      <GamingNavigation />
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

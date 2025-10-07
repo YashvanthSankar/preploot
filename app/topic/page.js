@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { YouTubeVideos } from "@/components/youtube-videos";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,7 +69,6 @@ function TopicLearningContent() {
   if (!examData || !currentSubject || !currentTopic) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -89,7 +87,6 @@ function TopicLearningContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Navigation and Header */}
         <div className="mb-8">
@@ -170,8 +167,17 @@ function TopicLearningContent() {
             </Button>
           )}
           <Button size="lg" variant="outline" onClick={() => {
+            // Get the last watched video ID for this topic
+            const key = `lastVideo_${examData.name}_${currentSubject}_${currentTopic}`;
+            const lastVideoId = localStorage.getItem(key);
+            
             // Practice quiz for this specific topic
-            router.push(`/quiz?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(currentTopic)}`);
+            if (lastVideoId) {
+              router.push(`/quiz?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(currentTopic)}&videoId=${lastVideoId}`);
+            } else {
+              // If no video watched yet, show alert
+              alert('Please watch at least one video before taking the quiz!');
+            }
           }}>
             Practice Quiz
           </Button>
@@ -235,7 +241,6 @@ export default function TopicLearning() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">

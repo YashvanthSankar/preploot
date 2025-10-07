@@ -1,15 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Header } from "@/components/header";
+import { useSession } from "next-auth/react";
 import { Footer } from "@/components/footer";
+import { GamingNavigation } from "@/components/gaming-navigation";
+import { GamingButton } from "@/components/gaming-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, CheckCircle, XCircle, Trophy } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle, XCircle, Trophy, AlertCircle } from "lucide-react";
 
 export default function QuizPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const [examData, setExamData] = useState(null);
   const [currentSubject, setCurrentSubject] = useState(null);
   const [currentTopic, setCurrentTopic] = useState(null);
@@ -19,43 +21,17 @@ export default function QuizPage() {
   const [score, setScore] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(300); // 5 minutes
   const [quizCompleted, setQuizCompleted] = useState(false);
-
-  // Sample quiz questions - in a real app, these would come from a database
-  const quizQuestions = [
-    {
-      question: "What is the fundamental principle in this topic?",
-      options: ["Option A", "Option B", "Option C", "Option D"],
-      correct: 1
-    },
-    {
-      question: "Which of the following is most important for understanding this concept?",
-      options: ["Basic theory", "Practical application", "Mathematical formulation", "All of the above"],
-      correct: 3
-    },
-    {
-      question: "How would you apply this knowledge in real scenarios?",
-      options: ["Method 1", "Method 2", "Method 3", "Depends on context"],
-      correct: 3
-    },
-    {
-      question: "What are the key challenges in mastering this topic?",
-      options: ["Complexity", "Time management", "Practice requirements", "All factors"],
-      correct: 3
-    },
-    {
-      question: "Which approach is most effective for learning this topic?",
-      options: ["Reading only", "Video tutorials", "Practice problems", "Combined approach"],
-      correct: 3
-    }
-  ];
-
-  const [userAnswers, setUserAnswers] = useState(new Array(quizQuestions.length).fill(null));
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userAnswers, setUserAnswers] = useState([]);
 
   useEffect(() => {
-    // Get exam, subject, and topic from URL parameters
+    // Get exam, subject, topic, and video ID from URL parameters
     const exam = searchParams.get('exam');
     const subject = searchParams.get('subject');
     const topic = searchParams.get('topic');
+    const videoId = searchParams.get('videoId');
     
     if (!exam || !subject) {
       router.push('/dashboard');
@@ -73,25 +49,94 @@ export default function QuizPage() {
         setExamData(parsedExam);
       } else {
         router.push('/dashboard');
+        return;
       }
     } else {
       router.push('/dashboard');
+      return;
     }
 
-    // Timer countdown
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleSubmitQuiz();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
+    // Fetch quiz questions from backend
+    fetchQuizQuestions(videoId);
   }, [searchParams, router]);
+
+  const fetchQuizQuestions = async (videoId) => {
+    if (!session?.user?.email || !videoId) {
+      setError('Missing required information to generate quiz');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const userId = session.user.email.replace('@', '_').replace(/\./g, '_');
+      const cacheId = `yt_${userId}_${videoId}`;
+
+      const response = await fetch(`http://localhost:5000/api/user/${userId}/generate/quiz`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cache_id: cacheId,
+          num_questions: 10,
+          difficulty: 'mixed',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch quiz: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      console.log('DEBUG: Raw response from backend:', data);
+      console.log('DEBUG: Quiz array:', data.quiz);
+      console.log('DEBUG: Quiz length:', data.quiz?.length);
+      
+      if (data.quiz && data.quiz.length > 0) {
+        console.log('DEBUG: First question from backend:', data.quiz[0]);
+        
+        // Convert backend format to frontend format
+        const formattedQuestions = data.quiz.map(q => ({
+          question: q.question,
+          options: q.options,
+          correct: q.options.indexOf(q.answer),
+          difficulty: q.difficulty,
+          explanation: q.explanation
+        }));
+        
+        console.log('DEBUG: First formatted question:', formattedQuestions[0]);
+        console.log('DEBUG: Formatted questions length:', formattedQuestions.length);
+        
+        setQuizQuestions(formattedQuestions);
+        setUserAnswers(new Array(formattedQuestions.length).fill(null));
+        
+        // Start timer after questions are loaded
+        const timer = setInterval(() => {
+          setTimeRemaining((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              handleSubmitQuiz();
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        return () => clearInterval(timer);
+      } else {
+        throw new Error('No quiz questions generated');
+      }
+    } catch (error) {
+      console.error('Error fetching quiz:', error);
+      setError(error.message || 'Failed to load quiz questions');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAnswerSelect = (answerIndex) => {
     setSelectedAnswer(answerIndex);
@@ -133,15 +178,40 @@ export default function QuizPage() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  if (!examData || !currentSubject) {
+  if (!examData || !currentSubject || loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p>Loading quiz...</p>
+              {error ? (
+                <Card className="max-w-md">
+                  <CardHeader>
+                    <div className="mx-auto w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                      <AlertCircle className="h-6 w-6 text-red-600" />
+                    </div>
+                    <CardTitle>Failed to Load Quiz</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-muted-foreground">{error}</p>
+                    <div className="flex gap-4 justify-center">
+                      <GamingButton type="primary" type="outline" onClick={() => router.back()}>
+                        Go Back
+                      </GamingButton>
+                      <GamingButton type="primary" onClick={() => window.location.reload()}>
+                        Try Again
+                      </GamingButton>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p>Loading quiz questions...</p>
+                  <p className="text-sm text-muted-foreground mt-2">Generating personalized questions for you</p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -156,7 +226,7 @@ export default function QuizPage() {
 
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="max-w-2xl mx-auto">
             <Card className="text-center">
@@ -199,7 +269,7 @@ export default function QuizPage() {
                 </div>
 
                 <div className="flex gap-4 justify-center">
-                  <Button onClick={() => {
+                  <GamingButton type="primary" variant="default" onClick={() => {
                     // Reset quiz
                     setCurrentQuestion(0);
                     setSelectedAnswer(null);
@@ -209,20 +279,20 @@ export default function QuizPage() {
                     setQuizCompleted(false);
                   }}>
                     Retake Quiz
-                  </Button>
+                  </GamingButton>
                   
                   {currentTopic ? (
-                    <Button variant="outline" onClick={() => {
+                    <GamingButton type="primary" type="outline" onClick={() => {
                       router.push(`/topic?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(currentTopic)}`);
                     }}>
                       Back to Topic
-                    </Button>
+                    </GamingButton>
                   ) : (
-                    <Button variant="outline" onClick={() => {
+                    <GamingButton type="primary" type="outline" onClick={() => {
                       router.push(`/subject?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}`);
                     }}>
                       Back to Subject
-                    </Button>
+                    </GamingButton>
                   )}
                 </div>
               </CardContent>
@@ -236,14 +306,14 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <GamingNavigation customTitle="Quiz Challenge" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
           {/* Quiz Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <Button 
-                variant="ghost" 
+              <GamingButton type="primary" 
+                type="ghost" 
                 onClick={() => {
                   if (currentTopic) {
                     router.push(`/topic?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(currentTopic)}`);
@@ -254,7 +324,7 @@ export default function QuizPage() {
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
-              </Button>
+              </GamingButton>
               
               <div className="flex items-center gap-4">
                 <div className="flex items-center text-orange-600">
@@ -311,32 +381,32 @@ export default function QuizPage() {
                     </div>
                     <span>{option}</span>
                   </div>
-                </Button>
+                </GamingButton>
               ))}
             </CardContent>
           </Card>
 
           {/* Navigation Buttons */}
           <div className="flex justify-between">
-            <Button 
-              variant="outline" 
+            <GamingButton type="primary" 
+              type="outline" 
               onClick={handlePreviousQuestion}
               disabled={currentQuestion === 0}
             >
               Previous
-            </Button>
+            </GamingButton>
             
             <div className="flex gap-4">
-              <Button variant="outline" onClick={handleSubmitQuiz}>
+              <GamingButton type="primary" type="outline" onClick={handleSubmitQuiz}>
                 Submit Quiz
-              </Button>
+              </GamingButton>
               
-              <Button 
+              <GamingButton type="primary" 
                 onClick={handleNextQuestion}
                 disabled={selectedAnswer === null}
               >
                 {currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
-              </Button>
+              </GamingButton>
             </div>
           </div>
         </div>

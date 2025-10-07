@@ -36,15 +36,22 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
   // Flask backend base URL - update this to match your Flask server
   const FLASK_BASE_URL = 'http://localhost:5000';
 
+  // Get user ID in the format expected by Flask (email with @ and . replaced)
+  const getUserId = () => {
+    if (!session?.user?.email) return null;
+    return session.user.email.replace('@', '_').replace(/\./g, '_');
+  };
+
   // Process YouTube video
   const processYouTubeVideo = async () => {
-    if (!session?.user?.id || !videoId) return;
+    const userId = getUserId();
+    if (!userId || !videoId) return;
     
     setLoading(prev => ({ ...prev, processing: true }));
     setProcessStatus('Processing video...');
     
     try {
-      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/upload/youtube`, {
+      const response = await fetch(`${FLASK_BASE_URL}/api/user/${userId}/upload/youtube`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +81,8 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
 
   // Load quiz data from Flask backend
   const loadQuiz = async () => {
-    if (!session?.user?.id) return;
+    const userId = getUserId();
+    if (!userId) return;
     
     setLoading(prev => ({ ...prev, quiz: true }));
     setProcessStatus('Generating quiz...');
@@ -87,7 +95,7 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
         if (!currentCacheId) return;
       }
 
-      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/generate/quiz`, {
+      const response = await fetch(`${FLASK_BASE_URL}/api/user/${userId}/generate/quiz`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,15 +111,26 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
       
       if (response.ok) {
         console.log('Flask quiz data received:', data);
-        // Handle different possible response structures
-        const quiz = data.quiz || data;
         
-        // Ensure the quiz has the expected structure
-        if (quiz && quiz.questions && Array.isArray(quiz.questions)) {
-          setQuizData(quiz);
+        // Backend returns { quiz: [...] }, but component expects { questions: [...] }
+        if (data.quiz && Array.isArray(data.quiz)) {
+          // Transform backend format to component format
+          const transformedQuiz = {
+            questions: data.quiz.map(q => ({
+              id: Math.random().toString(36).substr(2, 9),
+              question: q.question,
+              options: q.options,
+              correct: q.options.indexOf(q.answer), // Convert answer string to index
+              difficulty: q.difficulty || 'medium',
+              explanation: q.explanation || 'No explanation provided.'
+            }))
+          };
+          
+          console.log('Transformed quiz data:', transformedQuiz);
+          setQuizData(transformedQuiz);
           setProcessStatus('Quiz generated successfully!');
         } else {
-          console.warn('Invalid quiz structure:', quiz);
+          console.warn('Invalid quiz structure:', data);
           throw new Error('Invalid quiz format received from backend');
         }
       } else {
@@ -129,7 +148,8 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
 
   // Load notes data from Flask backend
   const loadNotes = async () => {
-    if (!session?.user?.id) return;
+    const userId = getUserId();
+    if (!userId) return;
     
     setLoading(prev => ({ ...prev, notes: true }));
     setProcessStatus('Generating notes...');
@@ -142,7 +162,7 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
         if (!currentCacheId) return;
       }
 
-      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/generate/notes`, {
+      const response = await fetch(`${FLASK_BASE_URL}/api/user/${userId}/generate/notes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

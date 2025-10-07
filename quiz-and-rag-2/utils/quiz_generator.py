@@ -79,23 +79,65 @@ Make sure the output is parsable. Do not include any other characters other than
             # Get the text response
             response_text = content.text
             
-            # Clean the response (remove markdown code blocks)
-            response_text = response_text.strip("```json").strip("```").strip()
+            # Clean the response (remove markdown code blocks and extra whitespace)
+            response_text = response_text.strip()
+            if response_text.startswith("```json"):
+                response_text = response_text[7:]
+            elif response_text.startswith("```"):
+                response_text = response_text[3:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+            
+            print(f"DEBUG: Response text length: {len(response_text)}")
+            print(f"DEBUG: First 200 chars: {response_text[:200]}")
+            
+            # Try to extract JSON array if embedded in text
+            json_match = re.search(r'\[\s*\{.*\}\s*\]', response_text, re.DOTALL)
+            if json_match:
+                response_text = json_match.group(0)
+                print(f"DEBUG: Extracted JSON array, length: {len(response_text)}")
             
             # Parse JSON
-            questions = json.loads(response_text)
+            try:
+                questions = json.loads(response_text)
+            except json.JSONDecodeError as je:
+                print(f"JSON decode error: {str(je)}")
+                print(f"Problematic text around error: {response_text[max(0, je.pos-100):min(len(response_text), je.pos+100)]}")
+                # Try to fix common JSON issues
+                response_text = response_text.replace('\n', ' ').replace('\r', '')
+                response_text = re.sub(r',\s*]', ']', response_text)  # Remove trailing commas
+                response_text = re.sub(r',\s*}', '}', response_text)  # Remove trailing commas in objects
+                questions = json.loads(response_text)
+            
+            print(f"DEBUG: Successfully parsed {len(questions)} questions")
+            
+            # Validate question format
+            validated_questions = []
+            for q in questions:
+                if all(key in q for key in ['question', 'options', 'answer', 'difficulty']):
+                    # Ensure explanation exists
+                    if 'explanation' not in q:
+                        q['explanation'] = 'No explanation provided.'
+                    validated_questions.append(q)
+                else:
+                    print(f"WARNING: Skipping invalid question: {q.get('question', 'Unknown')}")
+            
+            print(f"DEBUG: {len(validated_questions)} questions passed validation")
             
             # Apply filters from params if provided
             if params.get('difficulty') and params['difficulty'] != 'mixed':
-                questions = [q for q in questions if q['difficulty'] == params['difficulty']]
+                validated_questions = [q for q in validated_questions if q['difficulty'] == params['difficulty']]
             
             if params.get('num_questions'):
-                questions = questions[:params['num_questions']]
+                validated_questions = validated_questions[:params['num_questions']]
                 
-            return questions
+            return validated_questions
             
         except Exception as e:
             print(f"Error generating quiz: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return []
     
     def generate_quiz(self, text_chunks, params=None):

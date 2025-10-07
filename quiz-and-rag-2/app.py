@@ -1,5 +1,6 @@
 import os
 import hashlib
+import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -12,7 +13,15 @@ from utils.user_manager import create_user_directories
 from config import Config
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS
+# Enable CORS for all routes and origins (for development)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})
 app.config.from_object(Config)
 
 # Initialize components
@@ -71,7 +80,10 @@ def process_youtube(user_id):
         return jsonify({'error': 'No URL provided'}), 400
     
     try:
+        print(f"Processing YouTube URL: {data['url']}")
         video_id = extract_video_id(data['url'])
+        print(f"Extracted video ID: {video_id}")
+        
         if not video_id:
             return jsonify({'error': 'Invalid YouTube URL'}), 400
         
@@ -80,6 +92,7 @@ def process_youtube(user_id):
         cached_transcript = cache_manager.get_from_cache(cache_id)
         
         if cached_transcript:
+            print(f"Transcript found in cache for {video_id}")
             return jsonify({
                 'message': 'Transcript retrieved from cache',
                 'cache_id': cache_id,
@@ -87,7 +100,9 @@ def process_youtube(user_id):
             })
         
         # Fetch and process transcript
+        print(f"Fetching transcript for video {video_id}...")
         transcript = get_transcript(video_id)
+        print(f"Transcript fetched successfully, length: {len(transcript)} characters")
         cache_manager.save_to_cache(transcript, cache_id)
         
         return jsonify({
@@ -97,6 +112,9 @@ def process_youtube(user_id):
         })
         
     except Exception as e:
+        print(f"ERROR processing YouTube video: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/user/<user_id>/generate/quiz', methods=['POST'])
@@ -157,6 +175,10 @@ def generate_quiz(user_id):
         
         # Cache the generated quiz
         cache_manager.save_to_cache(quiz, quiz_cache_id)
+        
+        print(f"DEBUG: Generated {len(quiz)} quiz questions")
+        if len(quiz) > 0:
+            print(f"DEBUG: First question format: {json.dumps(quiz[0], indent=2)}")
         
         return jsonify({
             'message': 'Quiz generated successfully',

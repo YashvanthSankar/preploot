@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,8 +27,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         {session ? (
           <div className="text-center space-y-6 sm:space-y-8">
@@ -37,15 +34,16 @@ export default function Home() {
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
                 Welcome back, {session.user?.name}! 👋
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto ">
                 Ready to start your exam preparation journey?
               </p>
             </div>
             
             <div className="space-y-6">
               <Button 
+                variant="default"
                 size="lg" 
-                className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 gamified-button"
+                className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
                 onClick={() => router.push('/dashboard/exam-selection')}
               >
                 Get Started - Choose Your Exam
@@ -90,7 +88,7 @@ export default function Home() {
                   
                   {/* CTA Buttons */}
                   <div className="flex justify-center pt-4">
-                    <Button size="lg" className="text-lg px-8 py-4 h-auto font-semibold gamified-button shadow-lg hover:shadow-xl transition-all duration-200">
+                    <Button variant="default" size="lg" className="text-lg px-8 py-4 h-auto font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
                       Start Learning Free
                       <Trophy className="ml-2 h-5 w-5" />
                     </Button>
@@ -99,7 +97,7 @@ export default function Home() {
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-8 pt-8 max-w-2xl mx-auto">
                     <div className="text-center">
-                      <div className="text-2xl sm:text-3xl font-bold text-primary">10K+</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-blue-600">10K+</div>
                       <div className="text-sm text-muted-foreground">Students</div>
                     </div>
                     <div className="text-center">
@@ -107,7 +105,7 @@ export default function Home() {
                       <div className="text-sm text-muted-foreground">Exams Covered</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl sm:text-3xl font-bold text-purple-600">95%</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-blue-600">95%</div>
                       <div className="text-sm text-muted-foreground">Success Rate</div>
                     </div>
                   </div>

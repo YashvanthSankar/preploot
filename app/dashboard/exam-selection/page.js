@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 
 const EXAMS = [
@@ -192,7 +191,6 @@ export default function ExamSelection() {
   if (!selectedExam) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-8">
@@ -232,7 +230,6 @@ export default function ExamSelection() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">

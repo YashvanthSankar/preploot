@@ -20,33 +20,25 @@ def get_transcript(video_id):
         # Try preferred languages in order: English, Hindi, any auto-generated
         preferred_languages = ['en', 'hi', 'en-US', 'en-GB']
         
+        # Create an instance of the API
+        api = YouTubeTranscriptApi()
         fetched_transcript = None
         
         # First try to get transcript with preferred languages
-        for lang in preferred_languages:
+        try:
+            fetched_transcript = api.fetch(video_id, languages=preferred_languages)
+        except Exception as e:
+            # If preferred languages fail, try just English
             try:
-                # Use the instance method correctly
-                api = YouTubeTranscriptApi()
-                fetched_transcript = api.get_transcript(video_id, languages=[lang])
-                break
+                fetched_transcript = api.fetch(video_id, languages=['en'])
             except Exception:
-                continue
-        
-        # If no preferred language worked, try to get any available transcript
-        if fetched_transcript is None:
-            try:
-                # Get transcript in any available language
-                api = YouTubeTranscriptApi()
-                fetched_transcript = api.get_transcript(video_id)
-            except Exception as e:
-                # Simple fallback - try without any parameters
+                # Last resort - try any available language
                 try:
-                    api = YouTubeTranscriptApi()
                     fetched_transcript = api.fetch(video_id)
                 except Exception as final_error:
-                    raise Exception(f"No transcripts available. Tried all methods. Final error: {str(final_error)}")
+                    raise Exception(f"No transcripts available for video {video_id}. Error: {str(final_error)}")
         
-        # Process transcript
+        # Process transcript - fetch() returns a FetchedTranscript object with data
         full_text = ""
         for snippet in fetched_transcript:
             # Handle both dictionary and object formats

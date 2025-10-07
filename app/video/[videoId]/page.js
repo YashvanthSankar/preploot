@@ -43,6 +43,12 @@ export default function VideoPage() {
           ...prev,
           description: `${exam} ${subject} ${topic} - Educational content to help you master the concepts.`
         }));
+        
+        // Store the last watched video ID for quiz generation
+        if (videoId && exam && subject && topic) {
+          const key = `lastVideo_${exam}_${subject}_${topic}`;
+          localStorage.setItem(key, videoId);
+        }
       } catch (err) {
         setError('Failed to load video details');
         console.error('Error fetching video details:', err);
