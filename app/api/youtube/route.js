@@ -49,15 +49,39 @@ export async function GET(request) {
       });
     }
 
-    const videos = data.items.map(item => ({
-      id: item.id.videoId,
-      title: item.snippet.title,
-      description: item.snippet.description,
-      thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
-      channelTitle: item.snippet.channelTitle,
-      publishedAt: item.snippet.publishedAt,
-      url: `https://www.youtube.com/watch?v=${item.id.videoId}`
-    }));
+    const videos = data.items.map(item => {
+      // Debug the full item structure
+      console.log('🔍 Full YouTube API item structure:', JSON.stringify(item, null, 2));
+      
+      // Extract video ID properly
+      let videoId = null;
+      if (item.id && typeof item.id === 'object' && item.id.videoId) {
+        videoId = item.id.videoId;
+      } else if (item.id && typeof item.id === 'string') {
+        videoId = item.id;
+      } else {
+        console.error('❌ Could not extract video ID from:', item.id);
+        return null;
+      }
+      
+      // Use direct YouTube thumbnail URL construction for better reliability
+      const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+
+      console.log(`✅ Extracted Video ID: ${videoId}`);
+      console.log(`📝 Video Title: ${item.snippet.title}`);
+      console.log(`🖼️ Thumbnail URL: ${thumbnailUrl}`);
+      console.log('---');
+
+      return {
+        id: videoId,
+        title: item.snippet.title,
+        description: item.snippet.description,
+        thumbnail: thumbnailUrl,
+        channelTitle: item.snippet.channelTitle,
+        publishedAt: item.snippet.publishedAt,
+        url: `https://www.youtube.com/watch?v=${videoId}`
+      };
+    }).filter(Boolean); // Remove any null entries
 
     console.log(`Found ${videos.length} real YouTube videos for ${exam} ${subject}`);
 
@@ -68,8 +92,14 @@ export async function GET(request) {
 
   } catch (error) {
     console.error('Error fetching YouTube videos:', error);
+    
+    // Get exam and subject from the URL again for error fallback
+    const { searchParams } = new URL(request.url);
+    const examFallback = searchParams.get('exam') || 'General';
+    const subjectFallback = searchParams.get('subject') || 'Study';
+    
     return NextResponse.json({
-      videos: generateMockVideos(exam, subject),
+      videos: generateMockVideos(examFallback, subjectFallback),
       source: 'error_fallback'
     });
   }
@@ -118,15 +148,22 @@ function generateMockVideos(exam, subject) {
     'Study IQ Education'
   ];
 
-  const mockVideos = titleTemplates.map((title, index) => ({
-    id: `real_${mockVideoIds[index]}`,
-    title: title,
-    description: `Comprehensive ${subject} preparation for ${exam} exam. This video covers all important topics, previous year questions, and expert tips. Perfect for students preparing for competitive exams. Includes detailed explanations, shortcuts, and problem-solving techniques.`,
-    thumbnail: `https://img.youtube.com/vi/${mockVideoIds[index]}/mqdefault.jpg`,
-    channelTitle: channels[index],
-    publishedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last 90 days
-    url: `https://www.youtube.com/watch?v=${mockVideoIds[index]}`
-  }));
+  const mockVideos = titleTemplates.map((title, index) => {
+    const videoId = mockVideoIds[index];
+    const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+    console.log(`Mock video ${index + 1}: ${title}, VideoID: ${videoId}, Thumbnail: ${thumbnailUrl}`);
+    
+    return {
+      id: videoId, // Use actual video ID instead of prefixed version
+      title: title,
+      description: `Comprehensive ${subject} preparation for ${exam} exam. This video covers all important topics, previous year questions, and expert tips. Perfect for students preparing for competitive exams. Includes detailed explanations, shortcuts, and problem-solving techniques.`,
+      thumbnail: thumbnailUrl,
+      channelTitle: channels[index],
+      publishedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last 90 days
+      url: `https://www.youtube.com/watch?v=${videoId}`
+    };
+  });
 
+  console.log(`Generated ${mockVideos.length} mock videos for ${exam} ${subject}`);
   return mockVideos;
 }
