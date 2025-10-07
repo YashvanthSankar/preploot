@@ -1,6 +1,8 @@
 "use client"
 
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
@@ -9,6 +11,9 @@ import { BookOpen, Trophy, Zap, Users } from "lucide-react"
 
 export default function Home() {
   const { data: session, status } = useSession()
+  const router = useRouter()
+
+  // Remove automatic redirect - always show landing page first
 
   if (status === "loading") {
     return (
@@ -33,59 +38,23 @@ export default function Home() {
                 Welcome back, {session.user?.name}! 👋
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
-                Ready to continue your learning journey?
+                Ready to start your exam preparation journey?
               </p>
             </div>
             
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 max-w-4xl mx-auto">
-              <Card className="p-3 sm:p-4">
-                <CardHeader className="text-center pb-2 sm:pb-4">
-                  <BookOpen className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-                  <CardTitle className="text-sm sm:text-base">Study Sessions</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-lg sm:text-2xl font-bold">0</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Completed</p>
-                </CardContent>
-              </Card>
+            <div className="space-y-6">
+              <Button 
+                size="lg" 
+                className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
+                onClick={() => router.push('/dashboard/exam-selection')}
+              >
+                Get Started - Choose Your Exam
+              </Button>
               
-              <Card className="p-3 sm:p-4">
-                <CardHeader className="text-center pb-2 sm:pb-4">
-                  <Zap className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
-                  <CardTitle className="text-sm sm:text-base">XP Points</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-lg sm:text-2xl font-bold">0</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Total earned</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="p-3 sm:p-4">
-                <CardHeader className="text-center pb-2 sm:pb-4">
-                  <Trophy className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-orange-500" />
-                  <CardTitle className="text-sm sm:text-base">Streak</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-lg sm:text-2xl font-bold">0</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Days</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="p-3 sm:p-4">
-                <CardHeader className="text-center pb-2 sm:pb-4">
-                  <Users className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
-                  <CardTitle className="text-sm sm:text-base">Rank</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-lg sm:text-2xl font-bold">-</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Global</p>
-                </CardContent>
-              </Card>
+              <div className="text-sm text-muted-foreground">
+                <p>Select your competitive exam and start preparing with AI-powered learning</p>
+              </div>
             </div>
-            
-            <Button size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 mt-6 sm:mt-8">
-              Start Learning
-            </Button>
           </div>
         ) : (
           <div className="relative">
