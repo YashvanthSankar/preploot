@@ -25,14 +25,157 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
   const [activeTab, setActiveTab] = useState('quiz');
   const [quizData, setQuizData] = useState(null);
   const [notesData, setNotesData] = useState(null);
-  const [loading, setLoading] = useState({ quiz: false, notes: false });
+  const [loading, setLoading] = useState({ quiz: false, notes: false, processing: false });
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [quizStartTime, setQuizStartTime] = useState(null);
+  const [cacheId, setCacheId] = useState(null);
+  const [processStatus, setProcessStatus] = useState(null);
 
-  // Load quiz data
+  // Flask backend base URL - update this to match your Flask server
+  const FLASK_BASE_URL = 'http://localhost:5000';
+
+  // Process YouTube video
+  const processYouTubeVideo = async () => {
+    if (!session?.user?.id || !videoId) return;
+    
+    setLoading(prev => ({ ...prev, processing: true }));
+    setProcessStatus('Processing video...');
+    
+    try {
+      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/upload/youtube`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: `https://www.youtube.com/watch?v=${videoId}`
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setCacheId(data.cache_id);
+        setProcessStatus('Video processed successfully!');
+        return data.cache_id;
+      } else {
+        throw new Error(data.error || 'Failed to process video');
+      }
+    } catch (error) {
+      console.error('Error processing YouTube video:', error);
+      setProcessStatus(`Error: ${error.message}`);
+      return null;
+    } finally {
+      setLoading(prev => ({ ...prev, processing: false }));
+    }
+  };
+
+  // Load quiz data from Flask backend
   const loadQuiz = async () => {
+    if (!session?.user?.id) return;
+    
+    setLoading(prev => ({ ...prev, quiz: true }));
+    setProcessStatus('Generating quiz...');
+    
+    try {
+      // First process video if not already processed
+      let currentCacheId = cacheId;
+      if (!currentCacheId) {
+        currentCacheId = await processYouTubeVideo();
+        if (!currentCacheId) return;
+      }
+
+      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/generate/quiz`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cache_id: currentCacheId,
+          num_questions: 5,
+          difficulty: 'mixed'
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('Flask quiz data received:', data);
+        // Handle different possible response structures
+        const quiz = data.quiz || data;
+        
+        // Ensure the quiz has the expected structure
+        if (quiz && quiz.questions && Array.isArray(quiz.questions)) {
+          setQuizData(quiz);
+          setProcessStatus('Quiz generated successfully!');
+        } else {
+          console.warn('Invalid quiz structure:', quiz);
+          throw new Error('Invalid quiz format received from backend');
+        }
+      } else {
+        throw new Error(data.error || 'Failed to generate quiz');
+      }
+    } catch (error) {
+      console.error('Error loading quiz:', error);
+      setProcessStatus(`Error: ${error.message}`);
+      // Fallback to mock quiz
+      await loadMockQuiz();
+    } finally {
+      setLoading(prev => ({ ...prev, quiz: false }));
+    }
+  };
+
+  // Load notes data from Flask backend
+  const loadNotes = async () => {
+    if (!session?.user?.id) return;
+    
+    setLoading(prev => ({ ...prev, notes: true }));
+    setProcessStatus('Generating notes...');
+    
+    try {
+      // First process video if not already processed
+      let currentCacheId = cacheId;
+      if (!currentCacheId) {
+        currentCacheId = await processYouTubeVideo();
+        if (!currentCacheId) return;
+      }
+
+      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/generate/notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cache_id: currentCacheId
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setNotesData({
+          title: `Study Notes - ${videoTitle}`,
+          markdown: data.markdown,
+          notes: data.notes
+        });
+        setProcessStatus('Notes generated successfully!');
+      } else {
+        throw new Error(data.error || 'Failed to generate notes');
+      }
+    } catch (error) {
+      console.error('Error loading notes:', error);
+      setProcessStatus(`Error: ${error.message}`);
+      // Fallback to mock notes
+      await loadMockNotes();
+    } finally {
+      setLoading(prev => ({ ...prev, notes: false }));
+    }
+  };
+
+  // Fallback mock quiz function
+  const loadMockQuiz = async () => {
     setLoading(prev => ({ ...prev, quiz: true }));
     try {
       // For now, generate sample quiz data
@@ -94,20 +237,48 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
       setQuizData(mockQuiz);
     } catch (error) {
       console.error('Error loading quiz:', error);
-    } finally {
-      setLoading(prev => ({ ...prev, quiz: false }));
     }
   };
 
-  // Load notes data
-  const loadNotes = async () => {
-    setLoading(prev => ({ ...prev, notes: true }));
+  // Fallback mock notes function
+  const loadMockNotes = async () => {
     try {
-      // For now, generate sample notes
-      // TODO: Replace with actual API call to extract notes from video
       const mockNotes = {
         title: `Study Notes - ${subject} ${topic}`,
-        summary: `Comprehensive notes covering key concepts from this ${exam} ${subject} video.`,
+        markdown: `# Study Notes - ${subject} ${topic}
+
+## Summary
+Comprehensive notes covering key concepts from this ${exam} ${subject} video.
+
+## Key Concepts
+- Understanding the fundamentals of ${subject} is crucial for ${exam} success
+- Focus on conceptual clarity before attempting numerical problems  
+- Regular practice and revision are essential for retention
+- Connect theoretical knowledge with practical applications
+
+## Important Formulas
+- List of essential formulas covered in this video
+- Derivation steps for key equations
+- When and how to apply specific formulas
+- Common mistakes to avoid while using formulas
+
+## Exam Strategy
+- Time management tips for ${exam} ${subject} section
+- Question prioritization strategies
+- Common question patterns and approaches
+- Last-minute revision techniques
+
+## Practice Recommendations
+- Suggested practice problems related to this topic
+- Previous year questions to attempt
+- Mock test strategies for this subject
+- Additional resources for deeper understanding
+
+## Tips
+- Make your own summary after watching the video
+- Practice problems immediately after learning concepts
+- Review these notes before your exam
+- Discuss difficult concepts with peers or teachers`,
         sections: [
           {
             title: "Key Concepts",
@@ -156,23 +327,19 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
       setNotesData(mockNotes);
     } catch (error) {
       console.error('Error loading notes:', error);
-    } finally {
-      setLoading(prev => ({ ...prev, notes: false }));
     }
   };
 
   useEffect(() => {
-    loadQuiz();
-    loadNotes();
-    // Start quiz timer when quiz tab is loaded
-    if (activeTab === 'quiz') {
+    // Only start quiz timer when quiz tab is loaded and quiz exists
+    if (activeTab === 'quiz' && quizData && !quizSubmitted) {
       setQuizStartTime(Date.now());
     }
-  }, [videoId, exam, subject, topic]);
+  }, [videoId, exam, subject, topic, activeTab]);
 
   useEffect(() => {
     // Reset quiz timer when switching to quiz tab
-    if (activeTab === 'quiz' && !quizSubmitted) {
+    if (activeTab === 'quiz' && !quizSubmitted && quizData) {
       setQuizStartTime(Date.now());
     }
   }, [activeTab]);
@@ -187,7 +354,7 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
   };
 
   const handleQuizSubmit = async () => {
-    if (!quizData || !session?.user?.id) return;
+    if (!quizData?.questions || !session?.user?.id) return;
     
     const endTime = Date.now();
     const timeTaken = quizStartTime ? Math.floor((endTime - quizStartTime) / 1000) : 0;
@@ -211,6 +378,41 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
     const finalScore = Math.round((correctAnswers / quizData.questions.length) * 100);
     setScore(correctAnswers);
     setQuizSubmitted(true);
+
+    // Award XP for quiz completion
+    try {
+      const xpResponse = await fetch('/api/xp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'quiz_completion',
+          data: {
+            correctAnswers,
+            totalQuestions: quizData.questions.length,
+            quizId: `${videoId}-quiz`,
+            subject,
+            exam,
+            answers: userAnswers
+          }
+        })
+      });
+
+      if (xpResponse.ok) {
+        const xpData = await xpResponse.json();
+        console.log('XP awarded:', xpData);
+        
+        // Show XP notification
+        setProcessStatus(`Quiz completed! +${xpData.xpAwarded} XP earned. ${xpData.activityLog?.[0] || ''}`);
+        
+        // Update local state with new XP info if needed
+        if (xpData.user) {
+          // You can dispatch this to a global state or show a toast notification
+          console.log('User XP updated:', xpData.user);
+        }
+      }
+    } catch (error) {
+      console.error('Error awarding XP:', error);
+    }
 
     // Save quiz progress to API
     try {
@@ -270,12 +472,39 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
           {/* Quiz Tab */}
           <TabsContent value="quiz" className="mt-4">
             <div className="space-y-4">
-              {loading.quiz ? (
+              {/* Process Status */}
+              {processStatus && (
+                <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+                  {processStatus}
+                </div>
+              )}
+              
+              {loading.quiz || loading.processing ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <span className="ml-2">Loading quiz...</span>
+                  <span className="ml-2">
+                    {loading.processing ? 'Processing video...' : 'Generating quiz...'}
+                  </span>
                 </div>
-              ) : quizData ? (
+              ) : !quizData ? (
+                <div className="text-center py-8 space-y-4">
+                  <div className="space-y-2">
+                    <Brain className="h-12 w-12 mx-auto text-muted-foreground" />
+                    <h3 className="font-semibold">Generate AI Quiz</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Create a quiz based on the content of this video using our AI system
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={loadQuiz}
+                    disabled={loading.quiz || loading.processing}
+                    className="w-full"
+                  >
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Generate Quiz from Video
+                  </Button>
+                </div>
+              ) : (
                 <>
                   <div className="space-y-2">
                     <h3 className="font-semibold">{quizData.title}</h3>
@@ -284,7 +513,7 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
                       <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
                         <div className="flex items-center space-x-2">
                           <Target className="h-4 w-4" />
-                          <span className="font-medium">Score: {score}/{quizData.questions.length}</span>
+                          <span className="font-medium">Score: {score}/{quizData?.questions?.length || 0}</span>
                         </div>
                         <Button size="sm" onClick={resetQuiz}>
                           <RefreshCw className="h-4 w-4 mr-1" />
@@ -296,7 +525,7 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
 
                   <ScrollArea className="h-96">
                     <div className="space-y-4 pr-4">
-                      {quizData.questions.map((question, index) => (
+                      {quizData?.questions?.map((question, index) => (
                         <Card key={question.id} className="p-4">
                           <div className="space-y-3">
                             <div className="flex items-start space-x-2">
@@ -305,7 +534,7 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
                             </div>
                             
                             <div className="space-y-2">
-                              {question.options.map((option, optionIndex) => {
+                              {question.options?.map((option, optionIndex) => {
                                 const isSelected = quizAnswers[question.id] === optionIndex;
                                 const isCorrect = optionIndex === question.correct;
                                 const showResult = quizSubmitted;
@@ -334,7 +563,7 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
                                     </div>
                                   </button>
                                 );
-                              })}
+                              }) || <p className="text-sm text-muted-foreground">No options available</p>}
                             </div>
                             
                             {quizSubmitted && (
@@ -364,11 +593,6 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
                     </Button>
                   )}
                 </>
-              ) : (
-                <div className="text-center py-8">
-                  <HelpCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No quiz available for this video</p>
-                </div>
               )}
             </div>
           </TabsContent>
@@ -376,12 +600,39 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
           {/* Notes Tab */}
           <TabsContent value="notes" className="mt-4">
             <div className="space-y-4">
-              {loading.notes ? (
+              {/* Process Status */}
+              {processStatus && (
+                <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+                  {processStatus}
+                </div>
+              )}
+              
+              {loading.notes || loading.processing ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <span className="ml-2">Loading notes...</span>
+                  <span className="ml-2">
+                    {loading.processing ? 'Processing video...' : 'Generating notes...'}
+                  </span>
                 </div>
-              ) : notesData ? (
+              ) : !notesData ? (
+                <div className="text-center py-8 space-y-4">
+                  <div className="space-y-2">
+                    <BookOpen className="h-12 w-12 mx-auto text-muted-foreground" />
+                    <h3 className="font-semibold">Generate Study Notes</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Create comprehensive study notes from this video content using AI
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={loadNotes}
+                    disabled={loading.notes || loading.processing}
+                    className="w-full"
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Generate Notes from Video
+                  </Button>
+                </div>
+              ) : (
                 <>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -396,45 +647,66 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
 
                   <ScrollArea className="h-96">
                     <div className="space-y-4 pr-4">
-                      {notesData.sections.map((section, index) => (
-                        <Card key={index} className="p-4">
-                          <h4 className="font-medium mb-3 flex items-center space-x-2">
-                            <BookOpen className="h-4 w-4" />
-                            <span>{section.title}</span>
-                          </h4>
-                          <ul className="space-y-2">
-                            {section.content.map((item, itemIndex) => (
-                              <li key={itemIndex} className="text-sm text-muted-foreground leading-relaxed">
-                                • {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </Card>
-                      ))}
-
-                      {notesData.tips && (
+                      {/* Show markdown content if available */}
+                      {notesData.markdown ? (
                         <Card className="p-4">
-                          <h4 className="font-medium mb-3 flex items-center space-x-2">
-                            <Lightbulb className="h-4 w-4" />
-                            <span>Study Tips</span>
-                          </h4>
-                          <ul className="space-y-2">
-                            {notesData.tips.map((tip, tipIndex) => (
-                              <li key={tipIndex} className="text-sm text-muted-foreground leading-relaxed">
-                                💡 {tip}
-                              </li>
-                            ))}
-                          </ul>
+                          <div className="prose prose-sm max-w-none space-y-2">
+                            {notesData.markdown.split('\n').map((line, index) => {
+                              // Simple markdown parsing
+                              if (line.startsWith('# ')) {
+                                return <h1 key={index} className="text-xl font-bold mt-4 mb-2">{line.substring(2)}</h1>;
+                              } else if (line.startsWith('## ')) {
+                                return <h2 key={index} className="text-lg font-semibold mt-3 mb-2">{line.substring(3)}</h2>;
+                              } else if (line.startsWith('### ')) {
+                                return <h3 key={index} className="text-md font-medium mt-2 mb-1">{line.substring(4)}</h3>;
+                              } else if (line.startsWith('- ')) {
+                                return <li key={index} className="text-sm text-muted-foreground ml-4">{line.substring(2)}</li>;
+                              } else if (line.trim() === '') {
+                                return <br key={index} />;
+                              } else {
+                                return <p key={index} className="text-sm text-muted-foreground">{line}</p>;
+                              }
+                            })}
+                          </div>
                         </Card>
-                      )}
+                      ) : notesData.sections ? (
+                        <>
+                          {notesData.sections.map((section, index) => (
+                            <Card key={index} className="p-4">
+                              <h4 className="font-medium mb-3 flex items-center space-x-2">
+                                <BookOpen className="h-4 w-4" />
+                                <span>{section.title}</span>
+                              </h4>
+                              <ul className="space-y-2">
+                                {section.content.map((item, itemIndex) => (
+                                  <li key={itemIndex} className="text-sm text-muted-foreground leading-relaxed">
+                                    • {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </Card>
+                          ))}
+
+                          {notesData.tips && (
+                            <Card className="p-4">
+                              <h4 className="font-medium mb-3 flex items-center space-x-2">
+                                <Lightbulb className="h-4 w-4" />
+                                <span>Study Tips</span>
+                              </h4>
+                              <ul className="space-y-2">
+                                {notesData.tips.map((tip, tipIndex) => (
+                                  <li key={tipIndex} className="text-sm text-muted-foreground leading-relaxed">
+                                    💡 {tip}
+                                  </li>
+                                ))}
+                              </ul>
+                            </Card>
+                          )}
+                        </>
+                      ) : null}
                     </div>
                   </ScrollArea>
                 </>
-              ) : (
-                <div className="text-center py-8">
-                  <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No notes available for this video</p>
-                </div>
               )}
             </div>
           </TabsContent>

@@ -158,7 +158,7 @@ export default function ProgressDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Target className="h-5 w-5" />
-              <span>Today's Goals</span>
+              <span>Today&apos;s Goals</span>
             </CardTitle>
           </CardHeader>
           <CardContent>

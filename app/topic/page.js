@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, Target, Trophy, CheckCircle } from "lucide-react";
 
-export default function TopicLearning() {
+function TopicLearningContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [examData, setExamData] = useState(null);
@@ -228,5 +228,26 @@ export default function TopicLearning() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+export default function TopicLearning() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading topic...</p>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    }>
+      <TopicLearningContent />
+    </Suspense>
   );
 }

@@ -58,14 +58,12 @@ model User {
   updatedAt     DateTime  @updatedAt
   
   // Relations for our app features
-  quizAttempts    QuizAttempt[]
-  badges          UserBadge[]
-  videoProgress   VideoProgress[]
-  studySessions   StudySession[]
-  topicProgress   TopicProgress[]
-  subjectProgress SubjectProgress[]
-  dailyGoals      DailyGoal[]
-  achievements    Achievement[]
+  quizAttempts     QuizAttempt[]
+  badges           UserBadge[]
+  subjectProgress  SubjectProgress[]
+  dailyGoals       DailyGoal[]
+  videoProgress    VideoProgress[]
+  achievements     Achievement[]
 }
 
 model VerificationToken {
@@ -123,120 +121,68 @@ model UserBadge {
   @@unique([userId, badgeId])
 }
 
-// Video Progress Tracking
-model VideoProgress {
-  id            String   @id @default(cuid())
-  userId        String
-  videoId       String
-  videoTitle    String
-  exam          String
-  subject       String
-  topic         String?
-  watchDuration Int      @default(0) // in seconds
-  totalDuration Int?     // video length in seconds
-  completed     Boolean  @default(false)
-  lastWatchedAt DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, videoId])
-}
-
-// Study Session Tracking
-model StudySession {
-  id        String   @id @default(cuid())
-  userId    String
-  exam      String
-  subject   String
-  topic     String?
-  duration  Int      // in minutes
-  activities Json    // activities during session
-  xpEarned  Int      @default(0)
-  createdAt DateTime @default(now())
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-// Topic Progress
-model TopicProgress {
-  id              String   @id @default(cuid())
-  userId          String
-  exam            String
-  subject         String
-  topic           String
-  videosWatched   Int      @default(0)
-  totalVideos     Int      @default(0)
-  quizzesTaken    Int      @default(0)
-  totalQuizzes    Int      @default(0)
-  averageScore    Float    @default(0)
-  timeSpent       Int      @default(0) // in minutes
-  completed       Boolean  @default(false)
-  lastStudiedAt   DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, exam, subject, topic])
-}
-
-// Subject Progress
 model SubjectProgress {
-  id              String   @id @default(cuid())
-  userId          String
-  exam            String
-  subject         String
-  topicsCompleted Int      @default(0)
-  totalTopics     Int      @default(0)
-  videosWatched   Int      @default(0)
-  totalVideos     Int      @default(0)
-  quizzesTaken    Int      @default(0)
-  averageScore    Float    @default(0)
-  timeSpent       Int      @default(0) // in minutes
-  level           Int      @default(1)
-  xpEarned        Int      @default(0)
-  completed       Boolean  @default(false)
-  lastStudiedAt   DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String   @id @default(cuid())
+  userId           String
+  exam             String
+  subject          String
+  totalTopics      Int      @default(10)
+  totalVideos      Int      @default(50)
+  topicsCompleted  Int      @default(0)
+  videosWatched    Int      @default(0)
+  quizzesTaken     Int      @default(0)
+  averageScore     Float    @default(0.0)
+  timeSpent        Int      @default(0) // in minutes
+  level            Int      @default(1)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
   
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@unique([userId, exam, subject])
 }
 
-// Daily Goals
 model DailyGoal {
-  id             String   @id @default(cuid())
-  userId         String
-  date           DateTime @db.Date
-  videosTarget   Int      @default(3)
-  videosWatched  Int      @default(0)
-  quizzesTarget  Int      @default(2)
-  quizzesTaken   Int      @default(0)
-  studyTimeTarget Int     @default(60) // in minutes
-  studyTimeActual Int     @default(0)
-  xpTarget       Int      @default(100)
-  xpEarned       Int      @default(0)
-  completed      Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @db.Date
+  targetVideos    Int      @default(3)
+  targetQuizzes   Int      @default(2)
+  completedVideos Int      @default(0)
+  completedQuizzes Int     @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  @@unique([userId, date])
+  @@unique([userId, date], name: "userId_date")
 }
 
-// Achievements
+model VideoProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  videoId         String
+  videoTitle      String?
+  exam            String?
+  subject         String?
+  topic           String?
+  watchedDuration Int      @default(0) // in seconds
+  totalDuration   Int?     // in seconds
+  completed       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, videoId])
+}
+
 model Achievement {
   id          String   @id @default(cuid())
   userId      String
-  type        String   // "streak", "quiz_master", "video_binge", etc.
+  type        String   // 'quiz_streak', 'video_watch', 'score_achievement', etc.
   title       String
   description String
-  icon        String
   xpReward    Int      @default(0)
   unlockedAt  DateTime @default(now())
   

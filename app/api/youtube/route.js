@@ -60,6 +60,16 @@ export async function GET(request) {
         
         if (data.error) {
           console.error(`YouTube API Error (attempt ${i + 1}):`, data.error);
+          
+          // Check if it's a quota exceeded error
+          if (data.error.errors && data.error.errors[0]?.reason === 'quotaExceeded') {
+            console.log('YouTube API quota exceeded, falling back to mock videos');
+            return NextResponse.json({
+              videos: generateMockVideos(exam, subject),
+              source: 'quota_exceeded',
+              message: 'YouTube API quota exceeded, showing sample videos'
+            });
+          }
         }
         
         if (data.items && data.items.length > 0) {
@@ -83,6 +93,17 @@ export async function GET(request) {
 
       if (data.error) {
         console.error('YouTube API Error:', data.error);
+        
+        // Check if it's a quota exceeded error
+        if (data.error.errors && data.error.errors[0]?.reason === 'quotaExceeded') {
+          console.log('YouTube API quota exceeded, falling back to mock videos');
+          return NextResponse.json({
+            videos: generateMockVideos(exam, subject),
+            source: 'quota_exceeded',
+            message: 'YouTube API quota exceeded, showing sample videos'
+          });
+        }
+        
         return NextResponse.json({
           videos: generateMockVideos(exam, subject),
           source: 'fallback'

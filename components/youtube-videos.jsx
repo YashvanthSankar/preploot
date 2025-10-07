@@ -162,131 +162,77 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
         )}
 
         {!loading && !error && videos.length > 0 && (
-          <>
-            {/* Debug Panel (only in development) */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 className="text-sm font-semibold text-yellow-800 mb-2">🔧 Debug Info:</h4>
-                <div className="text-xs text-yellow-700 space-y-1">
-                  <p>• Found {videos.length} videos</p>
-                  <p>• Data source: {dataSource}</p>
-                  <p>• Test first thumbnail: 
-                    <a 
-                      href={`https://img.youtube.com/vi/${videos[0]?.id}/mqdefault.jpg`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline ml-1"
-                    >
-                      Open in new tab
-                    </a>
-                  </p>
-                  <p>• Image load states: {Object.keys(imageLoadStates).length} tracked</p>
-                </div>
-              </div>
-            )}
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {videos.map((video, index) => (
-                <Card key={video.id} className="hover:shadow-lg transition-shadow duration-200">
-                  <div className="relative">
-                    {/* Thumbnail with enhanced debugging */}
-                    {imageLoadStates[video.id] === 'error' ? (
-                      // Enhanced fallback UI
-                      <div className="w-full h-48 bg-gradient-to-br from-red-500 to-red-600 rounded-t-lg flex items-center justify-center relative overflow-hidden">
-                        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-                        <div className="text-white text-center p-4 relative z-10">
-                          <Play className="h-16 w-16 mx-auto mb-3 opacity-90" />
-                          <p className="text-sm font-medium line-clamp-2">{video.title}</p>
-                          <p className="text-xs opacity-80 mt-2">Click to Watch on YouTube</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {videos.map((video, index) => {
+              const currentThumbnailSrc = thumbnailSrcs[video.id];
+
+              return (
+              <Card key={video.id} className="hover:shadow-lg transition-shadow duration-200">
+                <div className="relative group cursor-pointer" onClick={() => handleWatchVideo(video)}>
+                  {imageLoadStates[video.id] === 'error' ? (
+                    // Fallback UI when all retries have failed
+                    <div className="w-full h-48 bg-gradient-to-br from-red-600 via-red-500 to-red-700 rounded-t-lg flex items-center justify-center relative overflow-hidden">
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12"></div>
+                      </div>
+                      <div className="relative z-10 text-white text-center p-4 max-w-full">
+                        <div className="bg-red-600 rounded-full p-3 mx-auto mb-3 w-16 h-16 flex items-center justify-center shadow-lg">
+                          <Play className="h-8 w-8 text-white fill-current" />
+                        </div>
+                        <h4 className="text-sm font-semibold leading-tight line-clamp-2 mb-2">
+                          {truncateText(video.title, 60)}
+                        </h4>
+                        <p className="text-xs opacity-90">{video.channelTitle}</p>
+                        <div className="mt-2 text-xs opacity-75 bg-black bg-opacity-30 rounded px-2 py-1 inline-block">
+                          Click to Watch
                         </div>
                       </div>
-                    ) : (
-                      <>
-                        {/* Loading placeholder */}
-                        {imageLoadStates[video.id] !== 'loaded' && (
-                          <div className="absolute inset-0 w-full h-48 bg-gradient-to-br from-gray-300 to-gray-400 rounded-t-lg flex items-center justify-center z-10">
-                            <div className="text-center">
-                              <div className="animate-pulse">
-                                <Play className="h-12 w-12 text-gray-600 mx-auto mb-2" />
-                              </div>
-                              <p className="text-gray-600 text-sm">Loading thumbnail...</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Actual image with comprehensive cross-origin fixes */}
-                        <img 
-                          src={`https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`}
-                          alt={video.title}
-                          className={`w-full h-48 object-cover rounded-t-lg transition-opacity duration-500 ${
-                            imageLoadStates[video.id] === 'loaded' ? 'opacity-100' : 'opacity-0'
-                          }`}
-                          loading="eager"
-                          crossOrigin="anonymous"
-                          referrerPolicy="no-referrer-when-downgrade"
-                          style={{ 
-                            backgroundColor: '#1a1a1a',
-                            minHeight: '192px'
-                          }}
-                          onLoad={(e) => {
-                            console.log('✅ SUCCESS: Thumbnail loaded for:', video.title);
-                            console.log('🆔 Video ID used:', video.id);
-                            console.log('📊 Image dimensions:', e.target.naturalWidth, 'x', e.target.naturalHeight);
-                            console.log('🔗 Working URL:', e.target.src);
-                            handleImageLoad(video.id);
-                          }}
-                          onError={(e) => {
-                            console.log('❌ FAILED: Thumbnail error for:', video.title);
-                            console.log('🆔 Video ID used:', video.id);
-                            console.log('🚫 Failed URL:', e.target.src);
-                            console.log('🔍 Error details:', e.target.error);
-                            
-                            // Validate video ID before trying fallbacks
-                            if (!video.id || video.id.length !== 11) {
-                              console.error('🚨 INVALID VIDEO ID FORMAT:', video.id);
-                              handleImageError(video.id);
-                              return;
-                            }
-                            
-                            const videoId = video.id;
-                            const currentSrc = e.target.src;
-                            
-                            // Comprehensive fallback strategy
-                            if (currentSrc.includes('mqdefault.jpg')) {
-                              console.log('🔄 Trying hqdefault.jpg...');
-                              e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                            } else if (currentSrc.includes('hqdefault.jpg')) {
-                              console.log('🔄 Trying sddefault.jpg...');
-                              e.target.src = `https://img.youtube.com/vi/${videoId}/sddefault.jpg`;
-                            } else if (currentSrc.includes('sddefault.jpg')) {
-                              console.log('🔄 Trying maxresdefault.jpg...');
-                              e.target.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-                            } else if (currentSrc.includes('maxresdefault.jpg')) {
-                              console.log('🔄 Trying default.jpg...');
-                              e.target.src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
-                            } else if (currentSrc.includes('default.jpg')) {
-                              console.log('🔄 Trying alternative CDN (i.ytimg.com)...');
-                              e.target.src = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
-                            } else if (currentSrc.includes('i.ytimg.com')) {
-                              console.log('🔄 Trying YouTube web URL...');
-                              e.target.src = `https://img.youtube.com/vi_webp/${videoId}/mqdefault.webp`;
-                            } else {
-                              console.log('💥 ALL ATTEMPTS FAILED - Using fallback UI');
-                              handleImageError(video.id);
-                            }
-                          }}
-                        />
-                      </>
-                    )}
-                    
-                    <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
-                      #{index + 1}
                     </div>
+                  ) : (
+                    // Thumbnail attempt block
+                    <>
+                      {/* Loading placeholder */}
+                      {imageLoadStates[video.id] !== 'loaded' && (
+                        <div className="absolute inset-0 w-full h-48 bg-gradient-to-br from-gray-300 to-gray-400 rounded-t-lg flex items-center justify-center z-20">
+                          <div className="text-center">
+                            <div className="animate-pulse">
+                              <Play className="h-12 w-12 text-gray-600 mx-auto mb-2" />
+                            </div>
+                            <p className="text-gray-600 text-sm">Loading thumbnail...</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Actual image */}
+                      <img 
+                        // CRITICAL FIX: Use state for the src
+                        src={currentThumbnailSrc || `https://img.youtube.com/vi/${video.id}/default.jpg`} 
+                        alt={video.title}
+                        className={`w-full h-48 object-cover rounded-t-lg transition-opacity duration-500 ${
+                          imageLoadStates[video.id] === 'loaded' ? 'opacity-100' : 'opacity-0'
+                        } ${currentThumbnailSrc ? '' : 'hidden'}`} // Hide if src hasn't been initialized yet
+                        loading="eager"
+                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        decoding="async"
+                        style={{ 
+                          backgroundColor: '#1a1a1a',
+                          minHeight: '192px'
+                        }}
+                        onLoad={() => handleImageLoad(video.id)}
+                        // CRITICAL FIX: Pass the current src to the handler
+                        onError={(e) => handleImageError(video.id, e.target.src)} 
+                      />
+
+                      {/* Overlay and Badge */}
+                      <div className="absolute top-2 left-2 bg-black bg-opacity-80 text-white px-2 py-1 rounded text-xs font-semibold z-30">
+                        #{index + 1}
+                      </div>
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center rounded-t-lg z-30">
+                        <Play className="h-12 w-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      </div>
+                    </>
                   )}
-                  
-                  <div className="absolute top-2 left-2 bg-black bg-opacity-80 text-white px-2 py-1 rounded text-xs font-semibold">
-                    #{index + 1}
-                  </div>
                 </div>
                 
                 <CardContent className="p-4">
@@ -331,7 +277,8 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            );
+          })}
           </div>
         )}
 

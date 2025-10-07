@@ -1,0 +1,133 @@
+{
+  "timestamp": 1759837051.12552,
+  "data": {
+    "title": "Generated Notes",
+    "sections": [
+      {
+        "title": "Introduction to Physics Concepts",
+        "content": "This section covers basic physics concepts, including displacement, velocity, acceleration, projectile motion, Newton's laws, forces, and momentum.",
+        "subsections": [
+          {
+            "subtitle": "Distance vs. Displacement",
+            "points": [
+              "**Distance:** How far an object has traveled (scalar quantity – magnitude only). Example: 100 miles.",
+              "**Displacement:** Change in position, considering both magnitude and direction (vector quantity).",
+              "Displacement = Final Position (Pf) - Initial Position (Pi)",
+              "Displacement can be positive (east/north), negative (west/south), or zero."
+            ],
+            "key_terms": [
+              {
+                "term": "Scalar Quantity",
+                "definition": "A quantity that has only magnitude (e.g., distance, speed)."
+              },
+              {
+                "term": "Vector Quantity",
+                "definition": "A quantity that has both magnitude and direction (e.g., displacement, velocity, acceleration, force)."
+              }
+            ],
+            "examples": [
+              "John walks 8 meters east and then 3 meters west. Total distance = 11 meters. Displacement = +8 - 3 = 5 meters (east).",
+              "A car travels 200 miles (distance) vs. 300 miles north (displacement)."
+            ]
+          },
+          {
+            "subtitle": "Speed vs. Velocity",
+            "points": [
+              "**Speed:** How fast an object is moving (scalar quantity).  Always positive.",
+              "Formula:  d = vt (d = distance, v = speed, t = time)",
+              "**Velocity:** Speed with direction (vector quantity).  Can be positive or negative.",
+              "Velocity is associated with displacement while speed is associated with distance."
+            ],
+            "key_terms": [
+              {
+                "term": "Average Speed",
+                "definition": "Total distance traveled divided by total time."
+              },
+              {
+                "term": "Average Velocity",
+                "definition": "Displacement divided by total time."
+              }
+            ],
+            "examples": [
+              "A train moving at 45 m/s (speed). A train moving at 30 m/s west (velocity).",
+              "Object travels 12 m east (+12m displacement), then 20 m west (-20m displacement) in 4 seconds. Average speed = (12 + 20)/4 = 8 m/s.  Average velocity = (12-20)/4 = -2 m/s (west)."
+            ]
+          },
+          {
+            "subtitle": "Acceleration",
+            "points": [
+              "**Acceleration:** How fast velocity is changing.  The rate of change of velocity.",
+              "Formula:  a = (Vf - Vi) / t (a = acceleration, Vf = final velocity, Vi = initial velocity, t = time)",
+              "Units: meters per second squared (m/s²).",
+              "If acceleration and velocity have the same signs, the object is speeding up.",
+              "If acceleration and velocity have opposite signs, the object is slowing down."
+            ],
+            "examples": [
+              "A truck accelerates from 0 to 60 mph in 30 seconds (low acceleration). A sports car accelerates from 0 to 60 mph in 5 seconds (high acceleration).",
+              "Object with Vi = 12 m/s east, a = 4 m/s². Velocity increases by 4 m/s every second (16 m/s, 20 m/s, etc.).",
+              "Object with Vi = 24 m/s east, a = -6 m/s². Velocity decreases:  24, 18, 12, 6, 0, -6, -12, ... (slowing down then changing direction and speeding up)."
+            ]
+          },
+          {
+            "subtitle": "Gravitational Acceleration",
+            "points": [
+              "**Gravitational Acceleration (g):** Acceleration due to gravity.  On Earth, g = -9.8 m/s² (in the y-direction).",
+              "Acts on the vertical (y) component of velocity (Vy), not the horizontal (x) component (Vx).",
+              "Negative sign indicates that gravity causes a decrease in velocity in the downward direction.",
+              "The moon has a lower g = -1.6 m/s²."
+            ],
+            "examples": [
+              "Ball dropped from rest (Vi = 0 m/s).  Vy decreases by 9.8 m/s every second (0, -9.8, -19.6 m/s, etc.).",
+              "Ball thrown upwards with Vi = 29.4 m/s.  Vy decreases until Vy = 0 (at max height), then becomes negative (-9.8 m/s, -19.6 m/s, etc.)."
+            ]
+          },
+          {
+            "subtitle": "Projectile Motion",
+            "points": [
+              "**Projectile:** An object moving under the influence of gravity.",
+              "Friction is typically ignored.",
+              "Two-dimensional motion (x and y directions).",
+              "**Trajectory:** The path of the projectile.",
+              "Vx is constant during projectile motion (horizontal direction).",
+              "Vy changes due to gravitational acceleration."
+            ],
+            "examples": [
+              "Ball rolling off a cliff with initial Vx = 5 m/s. Vy = 0 initially.  After 1 second: Vx = 5 m/s, Vy = -9.8 m/s.  After 2 seconds: Vx = 5 m/s, Vy = -19.6 m/s",
+              "Ball kicked at an angle with an initial velocity.  Vx = V * cos(θ), Vy = V * sin(θ). As the ball goes up and back down the Vy will decrease initially until Vy = 0 at its max height, and then become negative as it comes down.  Vx always remains constant."
+            ]
+          },
+          {
+            "subtitle": "Newton's First Law of Motion",
+            "points": [
+              "An object at rest stays at rest unless acted upon by a net force.",
+              "An object in motion stays in motion with the same velocity unless acted upon by a net force (inertia).",
+              "Friction opposes motion and can cause a moving object to slow down and stop."
+            ],
+            "key_terms": [
+              {
+                "term": "Tension Force",
+                "definition": "A force acting through a rope."
+              }
+            ],
+            "examples": [
+              "A box at rest needs a force to start moving (push or pull).",
+              "A box sliding across a surface stops due to friction.",
+              "Objects in space with almost no friction can travel forever (Earth orbiting the sun)."
+            ]
+          },
+          {
+            "subtitle": "Newton's Second Law of Motion",
+            "points": [
+              "The net force acting on an object is equal to the mass of the object times its acceleration.",
+              "Formula: Fnet = ma (Fnet = net force, m = mass, a = acceleration)."
+            ],
+            "examples": [
+              "A 10 kg mass with a 80 N force applied (no friction). Acceleration = 8 m/s².  Velocity increases by 8 m/s every second."
+            ]
+          }
+        ],
+        "key_terms": []
+      }
+    ]
+  }
+}
