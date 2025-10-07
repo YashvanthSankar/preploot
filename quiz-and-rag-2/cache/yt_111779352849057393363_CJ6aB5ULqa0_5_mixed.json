@@ -1,0 +1,65 @@
+{
+  "timestamp": 1759851810.076697,
+  "data": [
+    {
+      "question": "Which of the following best describes a convex lens?",
+      "options": [
+        "A diverging lens",
+        "A converging lens",
+        "A lens that forms only virtual images",
+        "A lens that always creates diminished images"
+      ],
+      "answer": "A converging lens",
+      "difficulty": "easy",
+      "explanation": "A convex lens is thicker in the middle and converges light rays."
+    },
+    {
+      "question": "Which of the following statements is correct regarding a ray of light passing through the optical center of a lens?",
+      "options": [
+        "It deviates significantly.",
+        "It reflects back.",
+        "It goes straight through without deviation.",
+        "It refracts at a 90-degree angle."
+      ],
+      "answer": "It goes straight through without deviation.",
+      "difficulty": "easy",
+      "explanation": "A ray passing through the optical center doesn't change direction."
+    },
+    {
+      "question": "An object is placed beyond 2F1 of a convex lens. Which of the following describes the image formed?",
+      "options": [
+        "Virtual, upright, and magnified",
+        "Real, inverted, and magnified",
+        "Real, inverted, and diminished",
+        "Virtual, upright, and diminished"
+      ],
+      "answer": "Real, inverted, and diminished",
+      "difficulty": "medium",
+      "explanation": "When the object is beyond 2F1, the image is real, inverted, and smaller than the object, and formed between F2 and 2F2."
+    },
+    {
+      "question": "If an object is placed at the focus (F1) of a convex lens, where will the image be formed?",
+      "options": [
+        "At the optical center",
+        "At 2F2",
+        "At infinity",
+        "Between the lens and the focus"
+      ],
+      "answer": "At infinity",
+      "difficulty": "medium",
+      "explanation": "When an object is at the focus, the refracted rays are parallel, forming the image at infinity."
+    },
+    {
+      "question": "When an object is placed between the optical center and focus of a convex lens, what are the characteristics of the image formed?",
+      "options": [
+        "Real and inverted",
+        "Real and diminished",
+        "Virtual and erect",
+        "Inverted and diminished"
+      ],
+      "answer": "Virtual and erect",
+      "difficulty": "medium",
+      "explanation": "When an object is placed between the optical center and focus of a convex lens, the image is virtual, erect, and magnified."
+    }
+  ]
+}

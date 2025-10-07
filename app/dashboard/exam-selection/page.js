@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/header";
@@ -145,7 +146,48 @@ const EXAMS = [
 
 export default function ExamSelection() {
   const [selectedExam, setSelectedExam] = useState(null);
+  const { data: session, status } = useSession();
   const router = useRouter();
+
+  // Redirect to landing page if not authenticated
+  if (status === "unauthenticated") {
+    router.push('/');
+    return null;
+  }
+
+  // Show loading state while checking authentication
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Function to save exam selection to both localStorage and database
+  const saveExamSelection = async (examData) => {
+    // Save to localStorage for immediate access
+    localStorage.setItem('selectedExam', JSON.stringify(examData));
+    
+    // Save to database if user is authenticated
+    if (session?.user?.id) {
+      try {
+        await fetch('/api/user/preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            selectedExam: examData.name,
+            selectedSubjects: Object.keys(examData.subjects)
+          })
+        });
+      } catch (error) {
+        console.error('Failed to save exam selection to database:', error);
+      }
+    }
+  };
 
   if (!selectedExam) {
     return (
@@ -220,13 +262,13 @@ export default function ExamSelection() {
                       variant="outline" 
                       className="w-full"
                       onClick={() => {
-                        // Store selected exam and subjects in localStorage
-                        localStorage.setItem('selectedExam', JSON.stringify({
+                        const examData = {
                           name: selectedExam.name,
                           fullName: selectedExam.fullName,
                           subjects: selectedExam.subjects,
                           description: selectedExam.description
-                        }));
+                        };
+                        saveExamSelection(examData);
                         router.push(`/subject?exam=${encodeURIComponent(selectedExam.name)}&subject=${encodeURIComponent(subject)}`);
                       }}
                     >
@@ -243,13 +285,13 @@ export default function ExamSelection() {
               ← Back to Exam Selection
             </Button>
             <Button onClick={() => {
-              // Store selected exam and subjects in localStorage
-              localStorage.setItem('selectedExam', JSON.stringify({
+              const examData = {
                 name: selectedExam.name,
                 fullName: selectedExam.fullName,
                 subjects: selectedExam.subjects,
                 description: selectedExam.description
-              }));
+              };
+              saveExamSelection(examData);
               router.push('/dashboard');
             }}>
               Continue to Dashboard

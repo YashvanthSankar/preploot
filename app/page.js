@@ -45,7 +45,7 @@ export default function Home() {
             <div className="space-y-6">
               <Button 
                 size="lg" 
-                className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
+                className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 gamified-button"
                 onClick={() => router.push('/dashboard/exam-selection')}
               >
                 Get Started - Choose Your Exam
@@ -90,7 +90,7 @@ export default function Home() {
                   
                   {/* CTA Buttons */}
                   <div className="flex justify-center pt-4">
-                    <Button size="lg" className="text-lg px-8 py-4 h-auto font-semibold bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-lg hover:shadow-xl transition-all duration-200">
+                    <Button size="lg" className="text-lg px-8 py-4 h-auto font-semibold gamified-button shadow-lg hover:shadow-xl transition-all duration-200">
                       Start Learning Free
                       <Trophy className="ml-2 h-5 w-5" />
                     </Button>

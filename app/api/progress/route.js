@@ -77,10 +77,8 @@ export async function GET(request) {
           data: {
             userId: session.user.id,
             date: today,
-            videosTarget: 3,
-            quizzesTarget: 2,
-            studyTimeTarget: 60,
-            xpTarget: 100
+            targetVideos: 3,
+            targetQuizzes: 2
           }
         });
       }
@@ -88,8 +86,8 @@ export async function GET(request) {
       console.error('Database error for daily goal, using defaults:', error);
       // Return mock daily goal if database is unavailable
       dailyGoal = {
-        videosTarget: 3,
-        quizzesTarget: 2,
+        targetVideos: 3,
+        targetQuizzes: 2,
         studyTimeTarget: 60,
         xpTarget: 100,
         videosWatched: 0,
@@ -113,18 +111,27 @@ export async function GET(request) {
           }
         });
 
-        // Create subject progress if it doesn't exist
-        if (!subjectProgress) {
-          subjectProgress = await prisma.subjectProgress.create({
-            data: {
+        // Get or create subject progress
+        subjectProgress = await prisma.subjectProgress.upsert({
+          where: {
+            userId_exam_subject: {
               userId: session.user.id,
               exam,
-              subject,
-              totalTopics: 10, // You can make this dynamic based on your curriculum
-              totalVideos: 50  // Same here
+              subject
             }
-          });
-        }
+          },
+          update: {
+            // Update last accessed
+            updatedAt: new Date()
+          },
+          create: {
+            userId: session.user.id,
+            exam,
+            subject,
+            totalTopics: 10, // You can make this dynamic based on your curriculum
+            totalVideos: 50  // Same here
+          }
+        });
       } catch (error) {
         console.error('Database error for subject progress, using defaults:', error);
         subjectProgress = {
@@ -223,9 +230,12 @@ async function getProgressStats(userId, exam = null, subject = null) {
     if (exam) whereClause.exam = exam;
     if (subject) whereClause.subject = subject;
 
+    // QuizAttempt model doesn't have exam/subject fields - count all quizzes for user
+    const quizWhereClause = { userId };
+
     const [videoCount, quizCount] = await Promise.all([
       prisma.videoProgress.count({ where: whereClause }),
-      prisma.quizAttempt.count({ where: { userId } })
+      prisma.quizAttempt.count({ where: quizWhereClause })
     ]);
 
     return {
@@ -250,10 +260,9 @@ async function handleVideoProgress(userId, data) {
         userId_videoId: { userId, videoId }
       },
       update: {
-        watchDuration: Math.max(watchDuration, 0),
+        watchedDuration: Math.max(watchDuration, 0),
         totalDuration,
-        completed,
-        lastWatchedAt: new Date()
+        completed
       },
       create: {
         userId,
@@ -262,7 +271,7 @@ async function handleVideoProgress(userId, data) {
         exam,
         subject,
         topic,
-        watchDuration: Math.max(watchDuration, 0),
+        watchedDuration: Math.max(watchDuration, 0),
         totalDuration,
         completed
       }
@@ -373,10 +382,8 @@ async function updateDailyGoal(userId, updates) {
       create: {
         userId,
         date: today,
-        videosTarget: 3,
-        quizzesTarget: 2,
-        studyTimeTarget: 60,
-        xpTarget: 100,
+        targetVideos: 3,
+        targetQuizzes: 2,
         ...incrementData
       }
     });

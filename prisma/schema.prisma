@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,22 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// NextAuth.js required models
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -42,28 +34,27 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  
-  // Custom fields for our app
-  xp            Int       @default(0)
-  streak        Int       @default(0)
-  lastActiveAt  DateTime  @default(now())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  // Relations for our app features
-  quizAttempts     QuizAttempt[]
-  badges           UserBadge[]
-  subjectProgress  SubjectProgress[]
-  dailyGoals       DailyGoal[]
-  videoProgress    VideoProgress[]
+  id               String            @id @default(cuid())
+  name             String?
+  email            String            @unique
+  emailVerified    DateTime?
+  image            String?
+  xp               Int               @default(0)
+  streak           Int               @default(0)
+  lastActiveAt     DateTime          @default(now())
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  preferences      Json?
+  selectedExam     String?
+  selectedSubjects Json?
+  accounts         Account[]
   achievements     Achievement[]
+  dailyGoals       DailyGoal[]
+  quizAttempts     QuizAttempt[]
+  sessions         Session[]
+  subjectProgress  SubjectProgress[]
+  badges           UserBadge[]
+  videoProgress    VideoProgress[]
 }
 
 model VerificationToken {
@@ -74,15 +65,14 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Custom models for our learning platform
 model Quiz {
-  id          String        @id @default(cuid())
-  title       String
-  videoId     String
-  videoTitle  String
-  questions   Json          // Store questions as JSON
-  createdAt   DateTime      @default(now())
-  attempts    QuizAttempt[]
+  id         String        @id @default(cuid())
+  title      String
+  videoId    String
+  videoTitle String
+  questions  Json
+  createdAt  DateTime      @default(now())
+  attempts   QuizAttempt[]
 }
 
 model QuizAttempt {
@@ -90,12 +80,11 @@ model QuizAttempt {
   userId    String
   quizId    String
   score     Int
-  answers   Json     // Store user answers as JSON
+  answers   Json
   xpEarned  Int
   createdAt DateTime @default(now())
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Badge {
@@ -103,10 +92,9 @@ model Badge {
   name        String      @unique
   description String
   icon        String
-  requirement Json        // Store badge requirements as JSON
+  requirement Json
   createdAt   DateTime    @default(now())
-  
-  userBadges UserBadge[]
+  userBadges  UserBadge[]
 }
 
 model UserBadge {
@@ -114,47 +102,44 @@ model UserBadge {
   userId   String
   badgeId  String
   earnedAt DateTime @default(now())
-  
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-  
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, badgeId])
 }
 
 model SubjectProgress {
-  id               String   @id @default(cuid())
-  userId           String
-  exam             String
-  subject          String
-  totalTopics      Int      @default(10)
-  totalVideos      Int      @default(50)
-  topicsCompleted  Int      @default(0)
-  videosWatched    Int      @default(0)
-  quizzesTaken     Int      @default(0)
-  averageScore     Float    @default(0.0)
-  timeSpent        Int      @default(0) // in minutes
-  level            Int      @default(1)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id              String   @id @default(cuid())
+  userId          String
+  exam            String
+  subject         String
+  totalTopics     Int      @default(10)
+  totalVideos     Int      @default(50)
+  topicsCompleted Int      @default(0)
+  videosWatched   Int      @default(0)
+  quizzesTaken    Int      @default(0)
+  averageScore    Float    @default(0.0)
+  timeSpent       Int      @default(0)
+  level           Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, exam, subject])
 }
 
 model DailyGoal {
-  id              String   @id @default(cuid())
-  userId          String
-  date            DateTime @db.Date
-  targetVideos    Int      @default(3)
-  targetQuizzes   Int      @default(2)
-  completedVideos Int      @default(0)
-  completedQuizzes Int     @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id               String   @id @default(cuid())
+  userId           String
+  date             DateTime @db.Date
+  targetVideos     Int      @default(3)
+  targetQuizzes    Int      @default(2)
+  completedVideos  Int      @default(0)
+  completedQuizzes Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, date], name: "userId_date")
 }
 
@@ -166,25 +151,23 @@ model VideoProgress {
   exam            String?
   subject         String?
   topic           String?
-  watchedDuration Int      @default(0) // in seconds
-  totalDuration   Int?     // in seconds
+  watchedDuration Int      @default(0)
+  totalDuration   Int?
   completed       Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, videoId])
 }
 
 model Achievement {
   id          String   @id @default(cuid())
   userId      String
-  type        String   // 'quiz_streak', 'video_watch', 'score_achievement', etc.
+  type        String
   title       String
   description String
   xpReward    Int      @default(0)
   unlockedAt  DateTime @default(now())
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

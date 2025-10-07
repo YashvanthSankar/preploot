@@ -1,0 +1,16 @@
+flask
+flask-cors
+python-dotenv
+langchain
+langchain-google-genai
+langchain-community
+langchain-chroma
+youtube_transcript_api
+chromadb
+google-genai
+PyPDF2
+python-docx
+scikit-learn
+numpy
+werkzeug
+requests

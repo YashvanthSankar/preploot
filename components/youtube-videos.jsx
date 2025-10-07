@@ -106,20 +106,25 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
   };
 
   const truncateText = (text, maxLength = 100) => {
+    if (!text || typeof text !== 'string') return 'No description available';
     if (text.length <= maxLength) return text;
     return text.substr(0, maxLength) + '...';
   };
 
   const handleWatchVideo = (video) => {
+    const title = video.snippet?.title || video.title || 'Untitled Video';
+    const channelTitle = video.snippet?.channelTitle || video.channelTitle || 'Unknown Channel';
+    const videoId = video.id?.videoId || video.id || 'unknown';
+    
     const params = new URLSearchParams({
-      title: encodeURIComponent(video.title),
-      channel: encodeURIComponent(video.channelTitle),
+      title: encodeURIComponent(title),
+      channel: encodeURIComponent(channelTitle),
       exam: exam || '',
       subject: subject || '',
       topic: ''
     });
     
-    router.push(`/video/${video.id}?${params.toString()}`);
+    router.push(`/video/${videoId}?${params.toString()}`);
   };
 
 
@@ -180,9 +185,9 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
                           <Play className="h-8 w-8 text-white fill-current" />
                         </div>
                         <h4 className="text-sm font-semibold leading-tight line-clamp-2 mb-2">
-                          {truncateText(video.title, 60)}
+                          {truncateText(video.snippet?.title || video.title, 60)}
                         </h4>
-                        <p className="text-xs opacity-90">{video.channelTitle}</p>
+                        <p className="text-xs opacity-90">{video.snippet?.channelTitle || video.channelTitle || 'Unknown Channel'}</p>
                         <div className="mt-2 text-xs opacity-75 bg-black bg-opacity-30 rounded px-2 py-1 inline-block">
                           Click to Watch
                         </div>
@@ -237,18 +242,18 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
                 
                 <CardContent className="p-4">
                   <h3 className="font-semibold text-sm mb-2 line-clamp-2 leading-tight">
-                    {truncateText(video.title, 80)}
+                    {truncateText(video.snippet?.title || video.title, 80)}
                   </h3>
                   
                   <div className="flex items-center text-xs text-muted-foreground mb-2">
                     <User className="h-3 w-3 mr-1 flex-shrink-0" />
-                    <span className="mr-3 truncate">{video.channelTitle}</span>
+                    <span className="mr-3 truncate">{video.snippet?.channelTitle || video.channelTitle || 'Unknown Channel'}</span>
                     <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
-                    <span>{formatDate(video.publishedAt)}</span>
+                    <span>{formatDate(video.snippet?.publishedAt || video.publishedAt)}</span>
                   </div>
                   
                   <p className="text-xs text-muted-foreground mb-3 line-clamp-2 leading-relaxed">
-                    {truncateText(video.description, 100)}
+                    {truncateText(video.snippet?.description || video.description, 100)}
                   </p>
                   
                   <div className="flex space-x-2">

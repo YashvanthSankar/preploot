@@ -2,6 +2,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth-provider";
+import RAGChatbot from "@/components/rag-chatbot";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-background via-background to-primary/5`}
       >
         <ThemeProvider
           attribute="class"
@@ -32,6 +34,8 @@ export default function RootLayout({ children }) {
         >
           <AuthProvider>
             {children}
+            <RAGChatbot />
+            <Toaster position="top-right" />
           </AuthProvider>
         </ThemeProvider>
       </body>

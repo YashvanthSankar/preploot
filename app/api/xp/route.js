@@ -78,19 +78,30 @@ export async function POST(request) {
         xpAwarded = 1;
         
         // Check if streak should continue or reset
-        const yesterday = new Date();
+        const todayDate = new Date();
+        const yesterday = new Date(todayDate);
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayString = yesterday.toDateString();
+        
+        const lastActiveDate = new Date(user.lastActiveAt);
+        
+        // Reset time to start of day for accurate comparison
+        todayDate.setHours(0, 0, 0, 0);
+        yesterday.setHours(0, 0, 0, 0);
+        lastActiveDate.setHours(0, 0, 0, 0);
 
         let newStreak;
-        if (lastActive === yesterdayString) {
-          // Continuing streak
+        if (lastActiveDate.getTime() === yesterday.getTime()) {
+          // Continuing streak - user was active yesterday
           newStreak = user.streak + 1;
           activityLog.push(`Daily check-in! Streak continued: ${newStreak} days`);
-        } else {
-          // Streak broken or starting new
+        } else if (lastActiveDate.getTime() < yesterday.getTime()) {
+          // Streak broken - user missed a day or more
           newStreak = 1;
-          activityLog.push('Daily check-in! New streak started');
+          activityLog.push('Daily check-in! New streak started (previous streak broken)');
+        } else {
+          // User already checked in today (this shouldn't happen due to the check above)
+          newStreak = user.streak;
+          activityLog.push('Already checked in today!');
         }
 
         // Streak bonus XP (1 XP per streak day, max 10 bonus)

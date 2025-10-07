@@ -1,0 +1,209 @@
+{
+  "timestamp": 1759851834.958755,
+  "data": {
+    "title": "Generated Notes",
+    "sections": [
+      {
+        "title": "Introduction to Image Formation for Spherical Lenses",
+        "content": "Overview of image formation using convex and concave lenses.",
+        "subsections": [
+          {
+            "subtitle": "Light Ray Rules for Spherical Lenses",
+            "points": [
+              "Similar to spherical mirrors, we use light ray rules to draw ray diagrams and determine the image formed by spherical lenses.",
+              "Ray diagrams are essential for understanding image formation."
+            ]
+          }
+        ],
+        "key_terms": [
+          {
+            "term": "Spherical Lenses",
+            "definition": "Lenses with curved surfaces, either convex or concave."
+          },
+          {
+            "term": "Ray Diagram",
+            "definition": "A diagram that traces the path of light rays to determine the position and properties of an image."
+          }
+        ],
+        "examples": [
+          "Using a pencil and lenses to visualize image formation.",
+          "Standing in front of a lens to see how the image changes based on position."
+        ]
+      },
+      {
+        "title": "Convex Lens: Image Formation",
+        "content": "Detailed explanation of image formation using a convex (converging) lens.",
+        "subsections": [
+          {
+            "subtitle": "Drawing a Convex Lens Accurately",
+            "points": [
+              "Draw the principal axis (horizontal line).",
+              "Mark the optical center (O) at the center of the line.",
+              "Mark F1 and 2F1 to the left of O and F2 and 2F2 to the right of O. The distance from O to F1, F1 to 2F1, O to F2, and F2 to 2F2 should all be equal.",
+              "Sketch the convex lens, ensuring it's thin and symmetrical."
+            ]
+          },
+          {
+            "subtitle": "Rules for Image Formation (Convex Lens)",
+            "points": [
+              "Rule 1: A ray of light parallel to the principal axis, after refraction, passes through the focus on the other side of the lens (F2).",
+              "Rule 2: A ray of light passing through the optical center (O) goes straight, undeviated.",
+              "Rule 3: A ray of light passing through the focus (F1), after refraction, becomes parallel to the principal axis."
+            ]
+          },
+          {
+            "subtitle": "Image Properties",
+            "points": [
+              "The image can be real/inverted or virtual/upright.",
+              "The image can be magnified, diminished, or the same size as the object.",
+              "The position of the image depends on the object's position relative to the lens."
+            ]
+          },
+          {
+            "subtitle": "Case 1: Object Beyond 2F1",
+            "points": [
+              "Image is real and inverted.",
+              "Image is diminished.",
+              "Image is formed between F2 and 2F2."
+            ]
+          },
+          {
+            "subtitle": "Case 2: Object at 2F1",
+            "points": [
+              "Image is real and inverted.",
+              "Image is the same size as the object.",
+              "Image is formed at 2F2.",
+              "Exam tip: Draw the image first to ensure accuracy."
+            ]
+          },
+          {
+            "subtitle": "Case 3: Object Between F1 and 2F1",
+            "points": [
+              "Image is real and inverted.",
+              "Image is magnified.",
+              "Image is formed beyond 2F2."
+            ]
+          },
+          {
+            "subtitle": "Case 4: Object at F1",
+            "points": [
+              "Refracted rays are parallel.",
+              "Image is formed at infinity.",
+              "Image is real and inverted.",
+              "Image is highly magnified."
+            ]
+          },
+          {
+            "subtitle": "Case 5: Object Between O and F1",
+            "points": [
+              "Image is virtual and upright.",
+              "Image is magnified.",
+              "Image is formed behind the object."
+            ]
+          }
+        ],
+        "key_terms": [
+          {
+            "term": "Convex Lens",
+            "definition": "A lens that is thicker in the middle than at the edges, causing light rays to converge."
+          },
+          {
+            "term": "Converging Lens",
+            "definition": "Another term for a convex lens, referring to its effect on light rays."
+          },
+          {
+            "term": "Principal Axis",
+            "definition": "The horizontal line passing through the center of the lens."
+          },
+          {
+            "term": "Optical Center (O)",
+            "definition": "The center point of the lens where light rays pass through without deviation."
+          },
+          {
+            "term": "Focus (F)",
+            "definition": "The point where parallel light rays converge after passing through the lens (or appear to diverge from)."
+          },
+          {
+            "term": "Real Image",
+            "definition": "An image formed by the actual intersection of light rays; can be projected onto a screen."
+          },
+          {
+            "term": "Inverted Image",
+            "definition": "An image that is upside down compared to the object."
+          },
+          {
+            "term": "Virtual Image",
+            "definition": "An image formed by the apparent intersection of light rays; cannot be projected onto a screen."
+          },
+          {
+            "term": "Upright Image",
+            "definition": "An image that is oriented in the same direction as the object."
+          },
+          {
+            "term": "Magnified Image",
+            "definition": "An image that is larger than the object."
+          },
+          {
+            "term": "Diminished Image",
+            "definition": "An image that is smaller than the object."
+          }
+        ],
+        "examples": [
+          "Using a convex lens as a magnifying glass (Sherlock Holmes).",
+          "The various positions of the object and how the image changes."
+        ]
+      },
+      {
+        "title": "Concave Lens: Image Formation",
+        "content": "Detailed explanation of image formation using a concave (diverging) lens.",
+        "subsections": [
+          {
+            "subtitle": "Drawing a Concave Lens Accurately",
+            "points": [
+              "Draw the principal axis.",
+              "Mark the optical center (O).",
+              "Mark F1 and 2F1 to the right of O and F2 and 2F2 to the left of O, ensuring equal distances.",
+              "Sketch the concave lens, making sure it's thin."
+            ]
+          },
+          {
+            "subtitle": "Rules for Image Formation (Concave Lens)",
+            "points": [
+              "Rule 1: A ray of light parallel to the principal axis, after refraction, appears to be coming from the focus (F2).",
+              "Rule 2: A ray of light passing through the optical center (O) goes straight, undeviated.",
+              "Rule 3: A ray of light going towards the focus (F1), after refraction, becomes parallel to the principal axis."
+            ]
+          },
+          {
+            "subtitle": "Image Properties (Concave Lens)",
+            "points": [
+              "Image is always virtual and upright.",
+              "Image is always diminished.",
+              "Image is always formed between the object and the lens."
+            ]
+          }
+        ],
+        "key_terms": [
+          {
+            "term": "Concave Lens",
+            "definition": "A lens that is thinner in the middle than at the edges, causing light rays to diverge."
+          },
+          {
+            "term": "Diverging Lens",
+            "definition": "Another term for a concave lens, referring to its effect on light rays."
+          }
+        ],
+        "examples": [
+          "Object placed at different distances always creates similar image."
+        ]
+      },
+      {
+        "title": "Top Three Questions",
+        "content": "Encouragement to try solving practice questions on image formation.",
+        "subsections": [],
+        "key_terms": [],
+        "examples": []
+      }
+    ]
+  }
+}
