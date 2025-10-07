@@ -1,13 +1,18 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Volume2, VolumeX, Maximize, Settings } from 'lucide-react';
 
-export function VideoPlayer({ videoId, title }) {
+export function VideoPlayer({ videoId, title, exam, subject, topic }) {
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [progressSaved, setProgressSaved] = useState(false);
+  const [watchStartTime, setWatchStartTime] = useState(null);
   const iframeRef = useRef(null);
+  const progressSaveInterval = useRef(null);
 
   useEffect(() => {
     // Set loading to false after a brief delay to allow iframe to load
@@ -15,8 +20,64 @@ export function VideoPlayer({ videoId, title }) {
       setIsLoading(false);
     }, 2000);
 
-    return () => clearTimeout(timer);
-  }, [videoId]);
+    // Start tracking watch time when component mounts
+    if (session?.user?.id && videoId) {
+      setWatchStartTime(Date.now());
+      
+      // Save progress every 30 seconds
+      progressSaveInterval.current = setInterval(() => {
+        saveVideoProgress(false);
+      }, 30000);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      if (progressSaveInterval.current) {
+        clearInterval(progressSaveInterval.current);
+      }
+      // Save final progress when component unmounts
+      if (watchStartTime) {
+        saveVideoProgress(false);
+      }
+    };
+  }, [videoId, session]);
+
+  const saveVideoProgress = async (completed = false) => {
+    if (!session?.user?.id || !videoId || !watchStartTime) return;
+
+    const watchDuration = Math.floor((Date.now() - watchStartTime) / 1000); // in seconds
+    
+    try {
+      const response = await fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'video_progress',
+          data: {
+            videoId,
+            videoTitle: title,
+            exam,
+            subject,
+            topic,
+            watchDuration,
+            totalDuration: 0, // YouTube doesn't provide this easily
+            completed
+          }
+        })
+      });
+
+      if (response.ok) {
+        setProgressSaved(true);
+        setTimeout(() => setProgressSaved(false), 2000);
+      }
+    } catch (error) {
+      console.error('Failed to save video progress:', error);
+    }
+  };
+
+  const handleVideoComplete = () => {
+    saveVideoProgress(true);
+  };
 
   const handleIframeLoad = () => {
     setIsLoading(false);
@@ -118,8 +179,19 @@ export function VideoPlayer({ videoId, title }) {
               <Play className="h-4 w-4 mr-2" />
               Open in YouTube
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleVideoComplete}
+              disabled={!session?.user?.id}
+            >
+              Mark Complete
+            </Button>
           </div>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            {progressSaved && (
+              <span className="text-green-600 font-medium">Progress Saved!</span>
+            )}
             <span>Video ID: {videoId}</span>
           </div>
         </div>

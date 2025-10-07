@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react';
 
 export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState('quiz');
   const [quizData, setQuizData] = useState(null);
   const [notesData, setNotesData] = useState(null);
@@ -27,6 +29,7 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [quizStartTime, setQuizStartTime] = useState(null);
 
   // Load quiz data
   const loadQuiz = async () => {
@@ -161,7 +164,18 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
   useEffect(() => {
     loadQuiz();
     loadNotes();
+    // Start quiz timer when quiz tab is loaded
+    if (activeTab === 'quiz') {
+      setQuizStartTime(Date.now());
+    }
   }, [videoId, exam, subject, topic]);
+
+  useEffect(() => {
+    // Reset quiz timer when switching to quiz tab
+    if (activeTab === 'quiz' && !quizSubmitted) {
+      setQuizStartTime(Date.now());
+    }
+  }, [activeTab]);
 
   const handleAnswerSelect = (questionId, answerIndex) => {
     if (!quizSubmitted) {
@@ -172,24 +186,64 @@ export function VideoSidebar({ videoId, videoTitle, exam, subject, topic }) {
     }
   };
 
-  const handleQuizSubmit = () => {
-    if (!quizData) return;
+  const handleQuizSubmit = async () => {
+    if (!quizData || !session?.user?.id) return;
+    
+    const endTime = Date.now();
+    const timeTaken = quizStartTime ? Math.floor((endTime - quizStartTime) / 1000) : 0;
     
     let correctAnswers = 0;
+    const userAnswers = {};
+    
     quizData.questions.forEach(question => {
-      if (quizAnswers[question.id] === question.correct) {
+      const userAnswer = quizAnswers[question.id];
+      userAnswers[question.id] = {
+        selected: userAnswer,
+        correct: question.correct,
+        isCorrect: userAnswer === question.correct
+      };
+      
+      if (userAnswer === question.correct) {
         correctAnswers++;
       }
     });
     
+    const finalScore = Math.round((correctAnswers / quizData.questions.length) * 100);
     setScore(correctAnswers);
     setQuizSubmitted(true);
+
+    // Save quiz progress to API
+    try {
+      const response = await fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'quiz_attempt',
+          data: {
+            quizId: `${videoId}-quiz`,
+            score: finalScore,
+            answers: userAnswers,
+            timeTaken,
+            exam,
+            subject,
+            topic
+          }
+        })
+      });
+
+      if (response.ok) {
+        console.log('Quiz progress saved successfully');
+      }
+    } catch (error) {
+      console.error('Failed to save quiz progress:', error);
+    }
   };
 
   const resetQuiz = () => {
     setQuizAnswers({});
     setQuizSubmitted(false);
     setScore(0);
+    setQuizStartTime(Date.now());
   };
 
   return (

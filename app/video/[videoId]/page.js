@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { VideoPlayer } from '@/components/video-player';
 import { VideoSidebar } from '@/components/video-sidebar';
+import { ProgressTracker } from '@/components/progress-tracker';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Share2, BookOpen, Play } from 'lucide-react';
 import Link from 'next/link';
@@ -163,10 +164,17 @@ export default function VideoPage() {
             </div>
 
             {/* Sidebar */}
-            <div className="xl:col-span-1">
+            <div className="xl:col-span-1 space-y-6">
               <VideoSidebar 
                 videoId={videoId} 
                 videoTitle={videoData.title}
+                exam={exam}
+                subject={subject}
+                topic={topic}
+              />
+              
+              {/* Progress Tracker */}
+              <ProgressTracker 
                 exam={exam}
                 subject={subject}
                 topic={topic}
