@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -149,10 +149,11 @@ export default function ExamSelection() {
   const router = useRouter();
 
   // Redirect to landing page if not authenticated
-  if (status === "unauthenticated") {
-    router.push('/');
-    return null;
-  }
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push('/');
+    }
+  }, [status, router]);
 
   // Show loading state while checking authentication
   if (status === "loading") {
