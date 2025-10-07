@@ -8,6 +8,7 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [dataSource, setDataSource] = useState(null);
 
   useEffect(() => {
     if (isVisible && exam && subject) {
@@ -27,6 +28,7 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
         setError(data.error);
       } else {
         setVideos(data.videos || []);
+        setDataSource(data.source);
       }
     } catch (err) {
       setError('Failed to load videos');
@@ -54,9 +56,20 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
   return (
     <Card className="mt-6">
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Play className="h-5 w-5 text-red-500" />
-          <span>Top YouTube Videos for {exam} - {subject}</span>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Play className="h-5 w-5 text-red-500" />
+            <span>Top YouTube Videos for {exam} - {subject}</span>
+          </div>
+          {dataSource && (
+            <div className="text-xs px-2 py-1 rounded-full bg-muted">
+              {dataSource === 'youtube_api' ? (
+                <span className="text-green-600">🔴 Live YouTube Data</span>
+              ) : (
+                <span className="text-amber-600">📋 Demo Data</span>
+              )}
+            </div>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -85,8 +98,17 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
                     src={video.thumbnail} 
                     alt={video.title}
                     className="w-full h-48 object-cover rounded-t-lg"
+                    loading="lazy"
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/480x360/6366f1/ffffff?text=Video+Thumbnail';
+                      // Try different thumbnail sizes if the first one fails
+                      if (e.target.src.includes('mqdefault')) {
+                        e.target.src = video.thumbnail.replace('mqdefault', 'hqdefault');
+                      } else if (e.target.src.includes('hqdefault')) {
+                        e.target.src = video.thumbnail.replace('hqdefault', 'maxresdefault');
+                      } else {
+                        // Final fallback to a styled placeholder
+                        e.target.src = `https://via.placeholder.com/480x360/6366f1/ffffff?text=${encodeURIComponent(video.title.substring(0, 20))}`;
+                      }
                     }}
                   />
                   <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">

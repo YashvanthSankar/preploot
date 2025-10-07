@@ -10,43 +10,135 @@ const EXAMS = [
   { 
     name: "JEE", 
     fullName: "Joint Entrance Examination",
-    subjects: ["Physics", "Chemistry", "Mathematics"],
+    subjects: {
+      "Physics": [
+        "Mechanics", "Thermodynamics", "Waves and Oscillations", 
+        "Electrostatics", "Current Electricity", "Magnetic Effects", 
+        "Electromagnetic Induction", "Optics", "Modern Physics"
+      ],
+      "Chemistry": [
+        "Physical Chemistry", "Atomic Structure", "Chemical Bonding", 
+        "States of Matter", "Thermodynamics", "Chemical Equilibrium", 
+        "Organic Chemistry", "Inorganic Chemistry"
+      ],
+      "Mathematics": [
+        "Algebra", "Trigonometry", "Coordinate Geometry", 
+        "Calculus", "Vectors", "3D Geometry", "Probability", 
+        "Statistics", "Complex Numbers", "Matrices"
+      ]
+    },
     description: "For engineering colleges admission"
   },
   { 
     name: "NEET", 
     fullName: "National Eligibility Entrance Test",
-    subjects: ["Physics", "Chemistry", "Biology"],
+    subjects: {
+      "Physics": [
+        "Mechanics", "Thermodynamics", "Waves and Sound", 
+        "Electricity and Magnetism", "Optics", "Modern Physics"
+      ],
+      "Chemistry": [
+        "Some Basic Concepts", "Atomic Structure", "Chemical Bonding", 
+        "States of Matter", "Solutions", "Equilibrium", "Organic Chemistry"
+      ],
+      "Biology": [
+        "Diversity of Living World", "Cell Structure", "Plant Physiology", 
+        "Human Physiology", "Reproduction", "Genetics", "Ecology"
+      ]
+    },
     description: "For medical colleges admission"
   },
   { 
     name: "GATE", 
     fullName: "Graduate Aptitude Test in Engineering",
-    subjects: ["Engineering Mathematics", "General Aptitude", "Subject Paper"],
+    subjects: {
+      "Engineering Mathematics": [
+        "Linear Algebra", "Calculus", "Differential Equations", 
+        "Probability", "Numerical Methods"
+      ],
+      "General Aptitude": [
+        "Verbal Ability", "Numerical Ability", "Reasoning", "Data Interpretation"
+      ],
+      "Subject Paper": [
+        "Core Concepts", "Applied Mathematics", "Problem Solving"
+      ]
+    },
     description: "For M.Tech and PSU recruitment"
   },
   { 
     name: "UPSC", 
     fullName: "Union Public Service Commission",
-    subjects: ["General Studies", "CSAT", "Optional Subject", "Essay"],
+    subjects: {
+      "General Studies": [
+        "History", "Geography", "Polity", "Economics", 
+        "Environment", "Science & Technology", "Current Affairs"
+      ],
+      "CSAT": [
+        "Comprehension", "Logical Reasoning", "Data Interpretation", 
+        "Decision Making", "Problem Solving"
+      ],
+      "Optional Subject": [
+        "Paper I Topics", "Paper II Topics", "Advanced Concepts"
+      ],
+      "Essay": [
+        "Essay Writing", "Current Issues", "Social Issues", "Analysis"
+      ]
+    },
     description: "For civil services recruitment"
   },
   { 
     name: "CAT", 
     fullName: "Common Admission Test",
-    subjects: ["Quantitative Aptitude", "Data Interpretation", "Verbal Ability", "Logical Reasoning"],
+    subjects: {
+      "Quantitative Aptitude": [
+        "Number System", "Algebra", "Geometry", "Arithmetic", 
+        "Trigonometry", "Permutation", "Probability"
+      ],
+      "Data Interpretation": [
+        "Tables", "Bar Charts", "Line Charts", "Pie Charts", 
+        "Data Sufficiency", "Caselets"
+      ],
+      "Verbal Ability": [
+        "Reading Comprehension", "Para Jumbles", "Sentence Correction", 
+        "Vocabulary", "Grammar"
+      ],
+      "Logical Reasoning": [
+        "Arrangements", "Puzzles", "Series", "Coding", "Blood Relations"
+      ]
+    },
     description: "For MBA programs admission"
   },
   { 
     name: "SSC CGL", 
     fullName: "Staff Selection Commission",
-    subjects: ["General Intelligence", "General Awareness", "Quantitative Aptitude", "English Comprehension"],
+    subjects: {
+      "General Intelligence": [
+        "Analogies", "Space Visualization", "Problem Solving", 
+        "Analysis", "Decision Making"
+      ],
+      "General Awareness": [
+        "History", "Geography", "Economics", "Current Affairs", 
+        "Sports", "Science"
+      ],
+      "Quantitative Aptitude": [
+        "Number Systems", "Ratio Proportion", "Percentage", 
+        "Profit Loss", "Time and Work"
+      ],
+      "English Comprehension": [
+        "Grammar", "Vocabulary", "Reading Comprehension", 
+        "Synonyms", "Error Detection"
+      ]
+    },
     description: "For government job recruitment"
   },
   { 
     name: "Others / Custom Exam", 
     fullName: "Custom Examination",
-    subjects: ["Custom Subject 1", "Custom Subject 2", "Custom Subject 3"],
+    subjects: {
+      "Custom Subject 1": ["Topic 1", "Topic 2", "Topic 3"],
+      "Custom Subject 2": ["Topic A", "Topic B", "Topic C"],
+      "Custom Subject 3": ["Topic X", "Topic Y", "Topic Z"]
+    },
     description: "Create your own exam pattern"
   },
 ];
@@ -107,21 +199,38 @@ export default function ExamSelection() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {selectedExam.subjects.map((subject, index) => (
+            {Object.entries(selectedExam.subjects).map(([subject, topics]) => (
               <Card key={subject} className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105">
                 <CardHeader>
                   <h3 className="text-lg font-semibold">{subject}</h3>
+                  <p className="text-sm text-muted-foreground">{topics.length} topics</p>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Progress: 0%</p>
-                      <div className="w-full bg-muted rounded-full h-2 mt-2">
-                        <div className="bg-primary h-2 rounded-full" style={{ width: "0%" }}></div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Progress: 0%</p>
+                        <div className="w-full bg-muted rounded-full h-2 mt-1">
+                          <div className="bg-primary h-2 rounded-full" style={{ width: "0%" }}></div>
+                        </div>
                       </div>
                     </div>
-                    <Button size="sm" variant="outline">
-                      Start Learning
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        // Store selected exam and subjects in localStorage
+                        localStorage.setItem('selectedExam', JSON.stringify({
+                          name: selectedExam.name,
+                          fullName: selectedExam.fullName,
+                          subjects: selectedExam.subjects,
+                          description: selectedExam.description
+                        }));
+                        router.push(`/subject?exam=${encodeURIComponent(selectedExam.name)}&subject=${encodeURIComponent(subject)}`);
+                      }}
+                    >
+                      Study {subject}
                     </Button>
                   </div>
                 </CardContent>

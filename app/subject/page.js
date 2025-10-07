@@ -3,16 +3,16 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { YouTubeVideos } from "@/components/youtube-videos";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, Target, Trophy } from "lucide-react";
+import { ArrowLeft, BookOpen, Target, Trophy, Play } from "lucide-react";
 
 export default function SubjectLearning() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [examData, setExamData] = useState(null);
   const [currentSubject, setCurrentSubject] = useState(null);
+  const [topics, setTopics] = useState([]);
 
   useEffect(() => {
     // Get exam and subject from URL parameters
@@ -30,10 +30,10 @@ export default function SubjectLearning() {
     const storedExam = localStorage.getItem('selectedExam');
     if (storedExam) {
       const parsedExam = JSON.parse(storedExam);
-      if (parsedExam.name === exam) {
+      if (parsedExam.name === exam && parsedExam.subjects[subject]) {
         setExamData(parsedExam);
+        setTopics(parsedExam.subjects[subject] || []);
       } else {
-        // If exam doesn't match, redirect to dashboard
         router.push('/dashboard');
       }
     } else {
@@ -79,7 +79,7 @@ export default function SubjectLearning() {
               {examData.name} - {examData.fullName}
             </p>
             <p className="text-sm text-muted-foreground">
-              {examData.description}
+              {topics.length} topics available for study
             </p>
           </div>
         </div>
@@ -102,12 +102,12 @@ export default function SubjectLearning() {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Videos Watched</CardTitle>
+              <CardTitle className="text-sm font-medium">Topics Completed</CardTitle>
               <Target className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">Out of 10 videos</p>
+              <p className="text-xs text-muted-foreground">Out of {topics.length} topics</p>
             </CardContent>
           </Card>
           
@@ -123,25 +123,76 @@ export default function SubjectLearning() {
           </Card>
         </div>
 
+        {/* Topics Grid */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Select a Topic to Study</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {topics.map((topic, index) => (
+                <Card key={topic} className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-sm">{topic}</h3>
+                      <span className="text-xs bg-muted px-2 py-1 rounded">#{index + 1}</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Progress</span>
+                        <span>0%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-1">
+                        <div className="bg-primary h-1 rounded-full" style={{ width: "0%" }}></div>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        className="w-full mt-3"
+                        onClick={() => {
+                          router.push(`/topic?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(topic)}`);
+                        }}
+                      >
+                        <Play className="h-3 w-3 mr-1" />
+                        Study Topic
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4 mb-8 justify-center">
-          <Button size="lg">
-            Start Practice Test
+        <div className="flex flex-wrap gap-4 justify-center">
+          <Button size="lg" onClick={() => {
+            // Navigate to first topic
+            if (topics.length > 0) {
+              router.push(`/topic?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(topics[0])}`);
+            }
+          }}>
+            Start from First Topic
           </Button>
-          <Button size="lg" variant="outline">
+          <Button size="lg" variant="outline" onClick={() => {
+            // Download notes functionality - make it functional
+            const element = document.createElement('a');
+            const content = `${examData.name} - ${currentSubject} Study Notes\n\nTopics:\n${topics.map((topic, i) => `${i + 1}. ${topic}`).join('\n')}`;
+            const file = new Blob([content], { type: 'text/plain' });
+            element.href = URL.createObjectURL(file);
+            element.download = `${examData.name}_${currentSubject}_Notes.txt`;
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+          }}>
             Download Notes
           </Button>
-          <Button size="lg" variant="outline">
-            Previous Year Questions
+          <Button size="lg" variant="outline" onClick={() => {
+            // Practice test - navigate to a practice page
+            router.push(`/practice?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}`);
+          }}>
+            Practice Test
           </Button>
         </div>
-
-        {/* YouTube Videos Section */}
-        <YouTubeVideos 
-          exam={examData.name}
-          subject={currentSubject}
-          isVisible={true}
-        />
       </div>
       <Footer />
     </div>

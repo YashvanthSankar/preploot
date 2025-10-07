@@ -115,7 +115,7 @@ export default function Dashboard() {
                   <div>
                     <h4 className="font-medium mb-3">Available Subjects:</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {selectedExam.subjects.map((subject, index) => (
+                      {Object.entries(selectedExam.subjects).map(([subject, topics]) => (
                         <Card 
                           key={subject} 
                           className="p-3 hover:shadow-md transition-shadow cursor-pointer"
@@ -126,7 +126,7 @@ export default function Dashboard() {
                           <div className="flex justify-between items-center">
                             <div>
                               <h5 className="font-medium">{subject}</h5>
-                              <p className="text-xs text-muted-foreground">Progress: 0%</p>
+                              <p className="text-xs text-muted-foreground">{Array.isArray(topics) ? topics.length : 0} topics • Progress: 0%</p>
                               <div className="w-full bg-muted rounded-full h-1 mt-1">
                                 <div className="bg-primary h-1 rounded-full" style={{ width: "0%" }}></div>
                               </div>
