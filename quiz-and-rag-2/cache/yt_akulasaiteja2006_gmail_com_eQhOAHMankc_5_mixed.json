@@ -1,0 +1,65 @@
+{
+  "timestamp": 1759886044.9217937,
+  "data": [
+    {
+      "question": "What is the relationship between distance and displacement?",
+      "options": [
+        "Distance is always less than or equal to displacement.",
+        "Distance is always greater than or equal to displacement.",
+        "Distance is always equal to displacement.",
+        "Distance can be greater than, less than, or equal to displacement depending on the path."
+      ],
+      "answer": "Distance is always greater than or equal to displacement.",
+      "difficulty": "easy",
+      "explanation": "Displacement is the shortest distance between two points, while distance is the actual path traveled. The actual path can be longer than the shortest distance."
+    },
+    {
+      "question": "When a particle moves in a circle with angular displacement θ, what is the formula for displacement?",
+      "options": [
+        "rθ",
+        "2r sin(θ/2)",
+        "2πr",
+        "r cos(θ)"
+      ],
+      "answer": "2r sin(θ/2)",
+      "difficulty": "medium",
+      "explanation": "When a particle moves along a circular path and covers an angle θ, its displacement is given by 2r sin(θ/2), where r is the radius of the circle."
+    },
+    {
+      "question": "A car travels the first half of a journey at a speed of v1 and the second half at a speed of v2. What is the average speed for the entire journey?",
+      "options": [
+        "(v1 + v2) / 2",
+        "√(v1 * v2)",
+        "2v1v2 / (v1 + v2)",
+        "(v1v2) / (v1 + v2)"
+      ],
+      "answer": "2v1v2 / (v1 + v2)",
+      "difficulty": "medium",
+      "explanation": "When a body covers equal distances with different speeds, the average speed is given by the harmonic mean: 2v1v2 / (v1 + v2)."
+    },
+    {
+      "question": "What does the slope of a displacement-time graph represent?",
+      "options": [
+        "Acceleration",
+        "Velocity",
+        "Force",
+        "Kinetic Energy"
+      ],
+      "answer": "Velocity",
+      "difficulty": "easy",
+      "explanation": "The slope of a displacement-time graph is the rate of change of displacement with respect to time, which is the definition of velocity."
+    },
+    {
+      "question": "What is the physical meaning of the area under a velocity-time graph?",
+      "options": [
+        "Acceleration",
+        "Displacement",
+        "Force",
+        "Impulse"
+      ],
+      "answer": "Displacement",
+      "difficulty": "medium",
+      "explanation": "The area under the velocity-time graph represents the integral of velocity with respect to time, which gives the displacement of the object."
+    }
+  ]
+}

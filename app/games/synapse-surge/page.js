@@ -496,9 +496,10 @@ export default function SynapseSurgePage() {
                   </div>
 
                   <Button 
+                    variant="default"
                     onClick={startGame}
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-lg py-3"
+                    className="w-full text-lg py-3"
                   >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
@@ -678,7 +679,7 @@ export default function SynapseSurgePage() {
             <CardContent className="p-8 text-center">
               <h2 className="text-2xl font-bold mb-4">Game Paused</h2>
               <div className="flex items-center justify-center gap-4">
-                <Button onClick={resumeGame} className="bg-green-600 hover:bg-green-700">
+                <Button onClick={resumeGame} variant="default">
                   Resume Game
                 </Button>
                 <Button onClick={resetGame} variant="outline">
@@ -723,7 +724,7 @@ export default function SynapseSurgePage() {
               </div>
 
               <div className="flex items-center justify-center gap-4">
-                <Button onClick={startGame} className="bg-gradient-to-r from-cyan-600 to-blue-600">
+                <Button onClick={startGame} variant="default">
                   Play Again
                 </Button>
                 <Button onClick={resetGame} variant="outline">

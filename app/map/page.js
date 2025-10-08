@@ -684,7 +684,7 @@ export default function GameMapPage() {
                       href={`/quiz?type=boss&subject=${selectedSubject}&exam=${selectedExam}&boss=${selectedTopic.id}`}
                       className="flex-1"
                     >
-                      <Button size="lg" className="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700">
+                      <Button size="lg" variant="default" className="w-full">
                         <Sword className="h-5 w-5 mr-2" />
                         Challenge Boss
                       </Button>

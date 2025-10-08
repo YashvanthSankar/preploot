@@ -144,7 +144,7 @@ export default function GamesPage() {
                     </Button>
                   ) : (
                     <Link href={`/games/${game.id}`} className="block">
-                      <Button className="w-full group-hover:bg-primary/90 transition-colors">
+                      <Button variant="default" className="w-full">
                         Play Now
                       </Button>
                     </Link>

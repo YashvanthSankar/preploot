@@ -9,7 +9,7 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { 
   Crown, 
-  Skull, 
+  ArrowLeft,
   Sword, 
   Shield, 
   Heart, 
@@ -18,7 +18,8 @@ import {
   Star,
   ArrowRight,
   X,
-  CheckCircle
+  CheckCircle,
+  Skull
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -387,7 +388,7 @@ export default function BossFightPage() {
                 <Sword className="h-4 w-4 mr-2" />
                 Fight Again
               </Button>
-              <Button onClick={() => window.location.href = '/map'} className="flex-1">
+              <Button onClick={() => window.location.href = '/map'} variant="default" className="flex-1">
                 <ArrowRight className="h-4 w-4 mr-2" />
                 Continue Journey
               </Button>

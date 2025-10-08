@@ -4,15 +4,17 @@
 @custom-variant dark (&:is(.dark *));
 
 /* Import Gamified Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=VT323&family=Share+Tech+Mono&display=swap');
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-orbitron);
-  --font-gaming: var(--font-orbitron);
+  --font-heading: var(--font-press-start);
+  --font-gaming: var(--font-press-start);
+  --font-pixel: var(--font-pixelify);
+  --font-retro: var(--font-vt323);
   --color-success: var(--success);
   --color-xp: var(--xp);
   --color-streak: var(--streak);
@@ -54,6 +56,10 @@
 
 :root {
   --font-orbitron: 'Orbitron', monospace;
+  --font-press-start: 'Press Start 2P', cursive;
+  --font-pixelify: 'Pixelify Sans', sans-serif;
+  --font-vt323: 'VT323', monospace;
+  --font-share-tech: 'Share Tech Mono', monospace;
   --radius: 0.625rem;
   
   /* Light Mode - Clean & Professional */
@@ -379,4 +385,159 @@
 
 .delay-\[800ms\] {
   animation-delay: 800ms;
+}
+
+/* Enhanced Gamified Components */
+@layer components {
+  /* Glass morphism effect for cards */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dark .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Neon glow effect */
+  .neon-glow {
+    box-shadow: 
+      0 0 5px hsl(var(--primary)),
+      0 0 10px hsl(var(--primary)),
+      0 0 15px hsl(var(--primary)),
+      0 0 20px hsl(var(--primary));
+  }
+  
+  /* Floating animation */
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  /* Pulse animation for important elements */
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  
+  /* Gradient text effects */
+  .gradient-text-primary {
+    background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--level)));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .gradient-text-success {
+    background: linear-gradient(45deg, hsl(var(--success)), #10b981);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .gradient-text-streak {
+    background: linear-gradient(45deg, hsl(var(--streak)), #f59e0b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Interactive button effects */
+  .btn-gamified {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-gamified::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  
+  .btn-gamified:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+  
+  /* Achievement badge styles */
+  .achievement-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    border: 2px solid #ffa500;
+    box-shadow: 
+      0 0 10px #ffd700,
+      inset 0 0 10px rgba(255, 255, 255, 0.3);
+    animation: badgePulse 2s ease-in-out infinite;
+  }
+  
+  .dark .achievement-badge {
+    background: linear-gradient(135deg, #ffd700, #f59e0b);
+    box-shadow: 
+      0 0 15px #ffd700,
+      inset 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* New keyframe animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes badgePulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 0 10px #ffd700, inset 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #ffd700, inset 0 0 15px rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* Responsive enhancements */
+@media (max-width: 768px) {
+  .gamified-card {
+    transform: none;
+  }
+  
+  .gamified-card:hover {
+    transform: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  .btn-gamified:hover {
+    transform: none;
+  }
+}
+
+/* Focus states for accessibility */
+.btn-gamified:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+.gamified-card:focus-within {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
 }

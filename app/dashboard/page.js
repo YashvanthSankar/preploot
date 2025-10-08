@@ -14,7 +14,6 @@ import {
   CalendarDays, 
   Video, 
   Award, 
-  TrendingUp, 
   Zap, 
   Brain, 
   Trophy,
@@ -73,14 +72,14 @@ export default function DashboardPage() {
             currentStreak: data.currentStreak || 0,
             videosWatched: data.videosWatched || 0,
             quizzesCompleted: data.quizzesCompleted || 0,
-            weeklyProgress: data.weeklyProgress || Math.floor(Math.random() * 100),
-            studyTime: data.studyTime || Math.floor(Math.random() * 120),
+            weeklyProgress: data.weeklyProgress || 0,
+            studyTime: data.studyTime || 0,
             rank: data.rank || (data.totalXP > 1000 ? 'Advanced' : data.totalXP > 500 ? 'Intermediate' : 'Beginner')
           });
         }
       } catch (error) {
         console.error('Failed to fetch stats:', error);
-        // Enhanced default values
+        // Default values
         setStats({
           totalXP: 0,
           currentStreak: 0,
@@ -143,295 +142,244 @@ export default function DashboardPage() {
   const xpProgress = ((stats.totalXP % 100) / 100) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:from-background dark:via-background dark:to-primary/10">
+      <div className="container mx-auto px-4 py-6 space-y-6">
         
-        {/* Simple Page Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Track your learning progress and achievements</p>
+        {/* Gamified Header */}
+        <div className="text-center space-y-2 mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-br from-primary via-purple-500 to-pink-500 rounded-full shadow-lg">
+              <Crown className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              Command Center
+            </h1>
+          </div>
+          <p className="text-muted-foreground">Your learning kingdom awaits, {session?.user?.name || 'Champion'}!</p>
         </div>
 
-        {/* Stats Grid - Enhanced with Animations */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {/* Total XP Card */}
-          <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-primary/50 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Study Points</CardTitle>
-              <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                <Target className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+        {/* Compact Stats Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all border-2 hover:border-primary/50 bg-gradient-to-br from-card to-card/50 dark:from-card dark:to-card/80">
+            <CardContent className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-primary/10 rounded-full">
+                  <Target className="h-5 w-5 text-primary" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary mb-1">{stats.totalXP}</div>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <TrendingUp className="w-3 h-3 mr-1 text-green-500" />
-                Total points earned
-              </div>
+              <div className="text-2xl font-bold text-primary mb-1">{stats.totalXP}</div>
+              <div className="text-xs text-muted-foreground">XP Points</div>
             </CardContent>
           </Card>
 
-          {/* Streak Card */}
-          <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-orange-500/50 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Study Streak</CardTitle>
-              <div className="p-2 bg-orange-500/10 rounded-lg group-hover:bg-orange-500/20 transition-colors">
-                <Flame className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+          <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all border-2 hover:border-orange-500/50 bg-gradient-to-br from-card to-orange-50/20 dark:from-card dark:to-orange-900/10">
+            <CardContent className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-orange-500/10 rounded-full">
+                  <Flame className="h-5 w-5 text-orange-500" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-orange-500 mb-1">{stats.currentStreak}</div>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <CalendarDays className="w-3 h-3 mr-1" />
-                Days in a row
-              </div>
+              <div className="text-2xl font-bold text-orange-500 mb-1">{stats.currentStreak}</div>
+              <div className="text-xs text-muted-foreground">Day Streak</div>
             </CardContent>
           </Card>
 
-          {/* Videos Watched Card */}
-          <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-green-500/50 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Videos Watched</CardTitle>
-              <div className="p-2 bg-green-500/10 rounded-lg group-hover:bg-green-500/20 transition-colors">
-                <Video className="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" />
+          <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all border-2 hover:border-green-500/50 bg-gradient-to-br from-card to-green-50/20 dark:from-card dark:to-green-900/10">
+            <CardContent className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-green-500/10 rounded-full">
+                  <Video className="h-5 w-5 text-green-500" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-500 mb-1">{stats.videosWatched}</div>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <Clock className="w-3 h-3 mr-1" />
-                {stats.studyTime} mins study time
-              </div>
+              <div className="text-2xl font-bold text-green-500 mb-1">{stats.videosWatched}</div>
+              <div className="text-xs text-muted-foreground">Videos</div>
             </CardContent>
           </Card>
 
-          {/* Quizzes Completed Card */}
-          <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-purple-500/50 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-[400ms]">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Quizzes Completed</CardTitle>
-              <div className="p-2 bg-purple-500/10 rounded-lg group-hover:bg-purple-500/20 transition-colors">
-                <Award className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
+          <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all border-2 hover:border-purple-500/50 bg-gradient-to-br from-card to-purple-50/20 dark:from-card dark:to-purple-900/10">
+            <CardContent className="p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-purple-500/10 rounded-full">
+                  <Award className="h-5 w-5 text-purple-500" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-500 mb-1">{stats.quizzesCompleted}</div>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <Brain className="w-3 h-3 mr-1" />
-                Practice sessions
-              </div>
+              <div className="text-2xl font-bold text-purple-500 mb-1">{stats.quizzesCompleted}</div>
+              <div className="text-xs text-muted-foreground">Quizzes</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Daily Check-in Section */}
-        <div className="flex justify-center">
+        {/* Daily Check-in */}
+        <div className="flex justify-center mb-6">
           <DailyCheckin />
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Action Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* Current Exam Prep - Takes 2 columns */}
-          <Card className="lg:col-span-2 hover:shadow-lg transition-all duration-300 border-2 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-primary/10 rounded-xl">
-                    <BookOpen className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl">Current Exam Preparation</CardTitle>
-                    <CardDescription className="mt-1">
-                      You're preparing for <span className="font-semibold text-primary">{preferences.exam}</span>
-                    </CardDescription>
-                  </div>
-                </div>
-                <Badge variant="outline" className="hidden sm:flex">Active</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Subjects */}
-              <div>
-                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-yellow-500" />
-                  Selected Subjects
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {preferences.subjects && preferences.subjects.length > 0 ? (
-                    preferences.subjects.map((subject, index) => (
-                      <Badge 
-                        key={index} 
-                        variant="secondary" 
-                        className="px-3 py-1.5 hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
-                      >
-                        {subject}
-                      </Badge>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground text-sm">No subjects selected yet</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Weekly Progress */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                    Weekly Progress
-                  </h4>
-                  <span className="text-sm text-muted-foreground">{stats.weeklyProgress}%</span>
-                </div>
-                <Progress value={stats.weeklyProgress} className="h-2" />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Link href="/dashboard/exam-selection" className="flex-1 min-w-[200px]">
-                  <Button variant="default" className="w-full group">
-                    Change Exam
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Link href={`/subject?exam=${encodeURIComponent(preferences.exam)}`} className="flex-1 min-w-[200px]">
-                  <Button variant="default" className="w-full group">
-                    View Subjects
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats Sidebar */}
-          <Card className="hover:shadow-lg transition-all duration-300 border-2 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-[600ms]">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-purple-500/10 rounded-lg">
-                  <Trophy className="h-5 w-5 text-purple-500" />
-                </div>
-                <CardTitle className="text-lg">Your Stats</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Flame className="w-4 h-4 text-orange-500" />
-                    </div>
-                    <span className="text-sm font-medium">Study streak</span>
-                  </div>
-                  <Badge variant={stats.currentStreak > 0 ? "default" : "secondary"} className="font-bold">
-                    {stats.currentStreak} days
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Target className="w-4 h-4 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">Total points</span>
-                  </div>
-                  <Badge variant="secondary" className="font-bold">{stats.totalXP} XP</Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Trophy className="w-4 h-4 text-yellow-500" />
-                    </div>
-                    <span className="text-sm font-medium">Current rank</span>
-                  </div>
-                  <Badge className="font-bold">{stats.rank}</Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <BookOpen className="w-4 h-4 text-blue-500" />
-                    </div>
-                    <span className="text-sm font-medium">Current exam</span>
-                  </div>
-                  <Badge variant="outline" className="font-bold">{preferences.exam}</Badge>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <Link href={`/subject?exam=${encodeURIComponent(preferences.exam)}`}>
-                  <Button variant="default" className="w-full group">
-                    <Zap className="w-4 h-4 mr-2" />
-                    Continue Learning
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Bottom Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-primary/50 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-700">
-            <CardHeader>
+          {/* Game Map Card */}
+          <Card className="group hover:shadow-2xl hover:-translate-y-2 transition-all border-2 hover:border-purple-500/50 bg-gradient-to-br from-card via-purple-50/30 to-pink-50/30 dark:from-card dark:via-purple-900/20 dark:to-pink-900/20">
+            <CardHeader className="pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-primary to-primary/50 rounded-xl shadow-lg">
-                  <Brain className="h-6 w-6 text-white" />
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                  <Map className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Quick Start Learning</CardTitle>
-                  <CardDescription>Jump into your study session</CardDescription>
+                  <CardTitle className="text-lg bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Learning Map
+                  </CardTitle>
+                  <CardDescription>Navigate your learning journey</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Link href={`/subject?exam=${encodeURIComponent(preferences.exam)}`}>
-                <Button variant="default" className="w-full justify-between group">
-                  Browse Subjects
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link href="/dashboard/exam-selection">
-                <Button variant="default" className="w-full justify-between group">
-                  Select Different Exam
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <Link href="/map">
+                <Button variant="default" className="w-full group">
+                  <Map className="w-4 h-4 mr-2" />
+                  Enter Learning Map
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             </CardContent>
           </Card>
 
-          <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-purple-500/50 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-[800ms]">
-            <CardHeader>
+          {/* Games Portal */}
+          <Card className="group hover:shadow-2xl hover:-translate-y-2 transition-all border-2 hover:border-blue-500/50 bg-gradient-to-br from-card via-blue-50/30 to-cyan-50/30 dark:from-card dark:via-blue-900/20 dark:to-cyan-900/20">
+            <CardHeader className="pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-500/50 rounded-xl shadow-lg">
-                  <TrendingUp className="h-6 w-6 text-white" />
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                  <Gamepad2 className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Today's Goal</CardTitle>
-                  <CardDescription>Keep your streak alive!</CardDescription>
+                  <CardTitle className="text-lg bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                    Learning Games
+                  </CardTitle>
+                  <CardDescription>Fun ways to learn and practice</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Daily Target</span>
-                  <span className="font-medium">{stats.videosWatched}/3 videos</span>
+            <CardContent className="space-y-3">
+              <Link href="/games">
+                <Button variant="default" className="w-full group">
+                  <Gamepad2 className="w-4 h-4 mr-2" />
+                  Play Games
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Exam Selection */}
+          <Card className="group hover:shadow-2xl hover:-translate-y-2 transition-all border-2 hover:border-primary/50 bg-gradient-to-br from-card via-primary/5 to-primary/10 dark:from-card dark:via-primary/10 dark:to-primary/20">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-primary to-primary/70 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+                  <BookOpen className="h-6 w-6 text-white" />
                 </div>
-                <Progress value={(stats.videosWatched / 3) * 100} className="h-2" />
+                <div>
+                  <CardTitle className="text-lg">Current Quest</CardTitle>
+                  <CardDescription>
+                    {preferences.exam !== 'Select an exam' ? preferences.exam : 'Choose your adventure'}
+                  </CardDescription>
+                </div>
               </div>
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-purple-500/10">
-                <Sparkles className="w-5 h-5 text-yellow-500" />
-                <p className="text-sm">
-                  {stats.videosWatched >= 3 
-                    ? "🎉 Goal achieved! Keep it up!" 
-                    : `Watch ${3 - stats.videosWatched} more video${3 - stats.videosWatched > 1 ? 's' : ''} to complete your daily goal`}
-                </p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap gap-2 mb-3">
+                {preferences.subjects && preferences.subjects.length > 0 ? (
+                  preferences.subjects.slice(0, 3).map((subject, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {subject}
+                    </Badge>
+                  ))
+                ) : (
+                  <Badge variant="outline" className="text-xs">No subjects selected</Badge>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Link href="/dashboard/exam-selection">
+                  <Button variant="default" className="w-full group">
+                    <Target className="w-4 h-4 mr-2" />
+                    {preferences.exam !== 'Select an exam' ? 'Change Quest' : 'Start Quest'}
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+                
+                {preferences.exam !== 'Select an exam' && (
+                  <Link href={`/subject?exam=${encodeURIComponent(preferences.exam)}`}>
+                    <Button variant="outline" className="w-full group">
+                      <Zap className="w-4 h-4 mr-2" />
+                      Continue Learning
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Progress Section */}
+        <Card className="bg-gradient-to-r from-card via-primary/5 to-purple-500/5 dark:from-card dark:via-primary/10 dark:to-purple-900/20 border-2">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg">
+                <Trophy className="h-5 w-5 text-white" />
+              </div>
+              <CardTitle className="text-lg">Your Progress Kingdom</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div className="p-4 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium flex items-center gap-2">
+                    <Crown className="w-4 h-4 text-yellow-500" />
+                    Rank: {stats.rank}
+                  </span>
+                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                    Level {level}
+                  </Badge>
+                </div>
+                <Progress value={xpProgress} className="h-2 mb-2" />
+                <p className="text-xs text-muted-foreground">
+                  {stats.totalXP % 100} / {100} XP to next level
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5 dark:from-orange-500/20 dark:to-red-500/10">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-orange-500" />
+                    Streak Power
+                  </span>
+                  <Badge variant={stats.currentStreak > 0 ? "default" : "secondary"}>
+                    {stats.currentStreak} days
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[...Array(7)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-2 w-2 rounded-full ${
+                        i < stats.currentStreak 
+                          ? 'bg-orange-500' 
+                          : 'bg-muted'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {stats.currentStreak > 0 
+                    ? `${7 - stats.currentStreak} more days for weekly streak!` 
+                    : 'Start your learning streak today!'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
