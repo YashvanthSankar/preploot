@@ -219,12 +219,12 @@ function LeaderboardContent({ data, type, currentUserId, getRankIcon, getRankBac
               {/* User Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {user.name}
+                  <div className="text-sm font-medium text-gray-900 truncate flex items-center">
+                    <span>{user.name}</span>
                     {user.isCurrentUser && (
                       <Badge variant="secondary" className="ml-2 text-xs">You</Badge>
                     )}
-                  </p>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-4 text-xs text-gray-500">
                   <span>{formatLastActive(user.lastActiveAt)}</span>
@@ -251,10 +251,10 @@ function LeaderboardContent({ data, type, currentUserId, getRankIcon, getRankBac
               {getRankIcon(currentUserRank.rank)}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">
-                {currentUserRank.name}
+              <div className="text-sm font-medium text-gray-900 flex items-center">
+                <span>{currentUserRank.name}</span>
                 <Badge variant="secondary" className="ml-2 text-xs">You</Badge>
-              </p>
+              </div>
             </div>
             <div className="flex items-center space-x-1 text-sm font-medium">
               <IconComponent className="h-4 w-4 text-gray-600" />

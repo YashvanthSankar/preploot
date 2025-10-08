@@ -1,0 +1,65 @@
+{
+  "timestamp": 1759881667.5371377,
+  "data": [
+    {
+      "question": "What is the main goal of the 'Umeed' batch lectures?",
+      "options": [
+        "To teach advanced physics concepts.",
+        "To provide a comprehensive physics curriculum.",
+        "To help students solve physics problems using basic math.",
+        "To prepare students for all engineering entrance exams."
+      ],
+      "answer": "To help students solve physics problems using basic math.",
+      "difficulty": "easy",
+      "explanation": "The lecture emphasizes the importance of basic math skills for solving physics problems in NEET exams."
+    },
+    {
+      "question": "How can students access the PDF notes for the 'Umeed' batch lectures?",
+      "options": [
+        "By subscribing to a paid course on Physics Wallah.",
+        "By clicking the 'Buy Now' button in the 'Umeed' batch section and paying a fee.",
+        "By joining the 'Umeed' batch on the Physics Wallah app and clicking the 'Buy Now' button (which has no charge).",
+        "By subscribing to the Physics Wallah YouTube channel."
+      ],
+      "answer": "By joining the 'Umeed' batch on the Physics Wallah app and clicking the 'Buy Now' button (which has no charge).",
+      "difficulty": "medium",
+      "explanation": "The transcript explains how to access the notes through the Physics Wallah app within the 'Umeed' batch section after subscribing, which is free."
+    },
+    {
+      "question": "Where can students find video solutions for the practice sheets?",
+      "options": [
+        "On the Physics Wallah YouTube channel.",
+        "In the 'Umeed' batch section on the Physics Wallah app the day after the practice sheet is given.",
+        "In a separate paid course on Physics Wallah.",
+        "Nowhere, they have to solve the practice sheets by themselves."
+      ],
+      "answer": "In the 'Umeed' batch section on the Physics Wallah app the day after the practice sheet is given.",
+      "difficulty": "medium",
+      "explanation": "The transcript states that video solutions are available the next day in the 'Umeed' batch section of the Physics Wallah app."
+    },
+    {
+      "question": "What are the key topics that will be covered in the basic math lectures?",
+      "options": [
+        "Calculus, vector algebra, and complex numbers.",
+        "Basic trigonometry, differentiation, and integration.",
+        "Coordinate geometry, statistics, and probability.",
+        "Matrices, determinants, and linear equations."
+      ],
+      "answer": "Basic trigonometry, differentiation, and integration.",
+      "difficulty": "easy",
+      "explanation": "The speaker explicitly mentions basic trigonometry, differentiation, and integration as the topics for the lecture."
+    },
+    {
+      "question": "Which of the following represents the values for a 3-4-5 Pythagorean Triplet?",
+      "options": [
+        "30 degrees, 60 degrees, 90 degrees.",
+        "37 degrees, 53 degrees, 90 degrees.",
+        "45 degrees, 45 degrees, 90 degrees.",
+        "0 degrees, 90 degrees, 180 degrees."
+      ],
+      "answer": "37 degrees, 53 degrees, 90 degrees.",
+      "difficulty": "medium",
+      "explanation": "The transcript mentions that a triangle with sides 3, 4, and 5 has angles of 37 and 53 degrees, along with the 90 degree angle."
+    }
+  ]
+}

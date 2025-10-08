@@ -7,6 +7,7 @@ import { GamingNavigation } from "@/components/gaming-navigation";
 import { GamingButton } from "@/components/gaming-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Clock, CheckCircle, XCircle, Trophy, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export default function QuizPage() {
   const router = useRouter();
@@ -161,7 +162,7 @@ export default function QuizPage() {
     }
   };
 
-  const handleSubmitQuiz = () => {
+  const handleSubmitQuiz = async () => {
     let correctAnswers = 0;
     userAnswers.forEach((answer, index) => {
       if (answer === quizQuestions[index].correct) {
@@ -170,6 +171,53 @@ export default function QuizPage() {
     });
     setScore(correctAnswers);
     setQuizCompleted(true);
+
+    // Award XP for quiz completion
+    try {
+      const response = await fetch('/api/xp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'quiz_completion',
+          data: {
+            correctAnswers: correctAnswers,
+            totalQuestions: quizQuestions.length,
+            quizId: `quiz_${Date.now()}`,
+            subject: currentSubject,
+            exam: examData?.name,
+            answers: userAnswers
+          }
+        })
+      })
+      
+      if (response.ok) {
+        const xpData = await response.json()
+        console.log('XP awarded for quiz:', xpData)
+        
+        // Update navbar XP display in real-time
+        if (typeof window !== 'undefined' && window.updateNavbarXP) {
+          window.updateNavbarXP(xpData.totalXP || xpData.user?.xp, xpData.currentStreak || xpData.user?.streak)
+        }
+        
+        // Show XP notification
+        const percentage = Math.round((correctAnswers / quizQuestions.length) * 100)
+        toast.success(`🎯 Quiz completed! +${xpData.xpAwarded} XP earned!`, {
+          description: `Score: ${correctAnswers}/${quizQuestions.length} (${percentage}%)`,
+          duration: 4000,
+        })
+        
+        // Show activity log details
+        if (xpData.activityLog?.length > 0) {
+          setTimeout(() => {
+            toast.info(xpData.activityLog[0], { duration: 3000 })
+          }, 1000)
+        }
+      }
+    } catch (error) {
+      console.error('Error awarding XP for quiz:', error)
+    }
   };
 
   const formatTime = (seconds) => {
@@ -196,7 +244,7 @@ export default function QuizPage() {
                   <CardContent className="space-y-4">
                     <p className="text-muted-foreground">{error}</p>
                     <div className="flex gap-4 justify-center">
-                      <GamingButton type="primary" type="outline" onClick={() => router.back()}>
+                      <GamingButton type="outline" onClick={() => router.back()}>
                         Go Back
                       </GamingButton>
                       <GamingButton type="primary" onClick={() => window.location.reload()}>
@@ -268,6 +316,58 @@ export default function QuizPage() {
                   </p>
                 </div>
 
+                {/* Answer Review Section */}
+                <div className="text-left">
+                  <h4 className="text-lg font-semibold mb-4 text-center">Answer Review</h4>
+                  <div className="space-y-4 max-h-60 overflow-y-auto">
+                    {quizQuestions.map((question, index) => {
+                      const userAnswer = userAnswers[index];
+                      const correctAnswer = question.correct;
+                      const isCorrect = userAnswer === correctAnswer;
+                      
+                      return (
+                        <div key={index} className={`p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                          <div className="flex items-start space-x-2 mb-2">
+                            {isCorrect ? (
+                              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                            ) : (
+                              <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                            )}
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">Q{index + 1}: {question.question}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="ml-7 space-y-2 text-sm">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-muted-foreground">Your answer:</span>
+                              <span className={`font-medium ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                                {userAnswer !== null ? question.options[userAnswer] : 'Not answered'}
+                              </span>
+                            </div>
+                            
+                            {!isCorrect && (
+                              <div className="flex items-center space-x-2">
+                                <span className="text-muted-foreground">Correct answer:</span>
+                                <span className="font-medium text-green-700">
+                                  {question.options[correctAnswer]}
+                                </span>
+                              </div>
+                            )}
+                            
+                            {question.explanation && (
+                              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                                <span className="font-medium text-blue-800">Explanation: </span>
+                                <span className="text-blue-700">{question.explanation}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="flex gap-4 justify-center">
                   <GamingButton type="primary" variant="default" onClick={() => {
                     // Reset quiz
@@ -282,13 +382,13 @@ export default function QuizPage() {
                   </GamingButton>
                   
                   {currentTopic ? (
-                    <GamingButton type="primary" type="outline" onClick={() => {
+                    <GamingButton type="outline" onClick={() => {
                       router.push(`/topic?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(currentTopic)}`);
                     }}>
                       Back to Topic
                     </GamingButton>
                   ) : (
-                    <GamingButton type="primary" type="outline" onClick={() => {
+                    <GamingButton type="outline" onClick={() => {
                       router.push(`/subject?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}`);
                     }}>
                       Back to Subject
@@ -312,8 +412,7 @@ export default function QuizPage() {
           {/* Quiz Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <GamingButton type="primary" 
-                type="ghost" 
+              <GamingButton type="ghost" 
                 onClick={() => {
                   if (currentTopic) {
                     router.push(`/topic?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(currentTopic)}`);
@@ -365,9 +464,9 @@ export default function QuizPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {quizQuestions[currentQuestion].options.map((option, index) => (
-                <Button
+                <GamingButton
                   key={index}
-                  variant={selectedAnswer === index ? "default" : "outline"}
+                  type={selectedAnswer === index ? "primary" : "outline"}
                   className="w-full text-left justify-start h-auto p-4"
                   onClick={() => handleAnswerSelect(index)}
                 >
@@ -388,8 +487,7 @@ export default function QuizPage() {
 
           {/* Navigation Buttons */}
           <div className="flex justify-between">
-            <GamingButton type="primary" 
-              type="outline" 
+            <GamingButton type="outline" 
               onClick={handlePreviousQuestion}
               disabled={currentQuestion === 0}
             >
@@ -397,7 +495,7 @@ export default function QuizPage() {
             </GamingButton>
             
             <div className="flex gap-4">
-              <GamingButton type="primary" type="outline" onClick={handleSubmitQuiz}>
+              <GamingButton type="outline" onClick={handleSubmitQuiz}>
                 Submit Quiz
               </GamingButton>
               

@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Volume2, VolumeX, Maximize, Settings } from 'lucide-react';
+import { toast } from 'sonner';
 
 export function VideoPlayer({ videoId, title, exam, subject, topic }) {
   const { data: session } = useSession();
@@ -48,7 +49,8 @@ export function VideoPlayer({ videoId, title, exam, subject, topic }) {
     const watchDuration = Math.floor((Date.now() - watchStartTime) / 1000); // in seconds
     
     try {
-      const response = await fetch('/api/progress', {
+      // Save progress first
+      const progressResponse = await fetch('/api/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -66,9 +68,42 @@ export function VideoPlayer({ videoId, title, exam, subject, topic }) {
         })
       });
 
-      if (response.ok) {
+      if (progressResponse.ok) {
         setProgressSaved(true);
         setTimeout(() => setProgressSaved(false), 2000);
+        
+        // Award XP for video completion using the new XP system
+        if (completed) {
+          const xpResponse = await fetch('/api/xp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'video_completion',
+              data: {
+                videoId,
+                videoTitle: title,
+                exam,
+                subject,
+                topic
+              }
+            })
+          });
+          
+          if (xpResponse.ok) {
+            const xpData = await xpResponse.json();
+            
+            // Update navbar XP
+            if (typeof window !== 'undefined' && window.updateNavbarXP) {
+              window.updateNavbarXP(xpData.totalXP, xpData.currentStreak);
+            }
+            
+            // Show XP notification
+            toast.success(`📺 Video completed! +${xpData.xpAwarded} XP earned!`, {
+              description: `Watched: ${title}`,
+              duration: 3000,
+            });
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to save video progress:', error);

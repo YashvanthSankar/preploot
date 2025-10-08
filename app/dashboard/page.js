@@ -23,6 +23,7 @@ import {
   Sparkles,
   Flame
 } from 'lucide-react';
+import { DailyCheckin } from '@/components/daily-checkin';
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -216,6 +217,11 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Daily Check-in Section */}
+        <div className="flex justify-center">
+          <DailyCheckin />
         </div>
 
         {/* Main Content Grid */}

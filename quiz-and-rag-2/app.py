@@ -354,6 +354,109 @@ def clear_user_data(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/generate-taboo-card', methods=['POST'])
+def generate_taboo_card():
+    """Generate AI-powered taboo cards for the game."""
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    try:
+        subject = data.get('subject', 'Biology')
+        topic = data.get('topic', 'general')
+        difficulty = data.get('difficulty', 'medium')
+        
+        # Create prompt for AI to generate taboo card
+        prompt = f"""
+Create a taboo game card for the subject "{subject}" related to "{topic}" with {difficulty} difficulty.
+
+Generate a JSON response with this exact structure:
+
+{{
+  "concept": "The main concept/term to guess",
+  "description": "A clear description without using forbidden words (2-3 sentences)",
+  "forbiddenWords": ["word1", "word2", "word3", "word4", "word5", "word6"],
+  "difficulty": "{difficulty.capitalize()}",
+  "subject": "{subject}"
+}}
+
+Rules:
+1. The concept should be a single term or short phrase
+2. The description should be clear but avoid obvious words
+3. Include exactly 6 forbidden words that would make guessing too easy
+4. Make sure the description doesn't contain any forbidden words
+5. Difficulty should match the complexity of the concept
+
+Make it educational and engaging for students studying {subject}.
+"""
+
+        # Use the existing quiz generator's AI client
+        from google import genai
+        client = genai.Client()
+        
+        content = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            contents=prompt
+        )
+        
+        response_text = content.text.strip()
+        
+        # Clean the response
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        elif response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+        
+        # Parse JSON
+        import json
+        card_data = json.loads(response_text)
+        
+        # Validate the card structure
+        required_fields = ['concept', 'description', 'forbiddenWords', 'difficulty', 'subject']
+        if not all(field in card_data for field in required_fields):
+            raise ValueError("Invalid card structure")
+        
+        if not isinstance(card_data['forbiddenWords'], list) or len(card_data['forbiddenWords']) != 6:
+            raise ValueError("Must have exactly 6 forbidden words")
+        
+        return jsonify(card_data)
+        
+    except json.JSONDecodeError as e:
+        return jsonify({'error': 'Failed to parse AI response'}), 500
+    except Exception as e:
+        print(f"Error generating taboo card: {str(e)}")
+        
+        # Fallback cards if AI fails
+        fallback_cards = {
+            'Biology': {
+                'concept': 'Photosynthesis',
+                'description': 'This process allows green organisms to convert light energy into chemical energy, producing glucose and releasing a gas essential for animal life.',
+                'forbiddenWords': ['sunlight', 'chlorophyll', 'plant', 'oxygen', 'green', 'leaves'],
+                'difficulty': difficulty.capitalize(),
+                'subject': subject
+            },
+            'Physics': {
+                'concept': 'Gravity',
+                'description': 'An invisible force that pulls objects toward each other, keeping us grounded and causing dropped items to fall downward.',
+                'forbiddenWords': ['force', 'fall', 'Newton', 'weight', 'attraction', 'mass'],
+                'difficulty': difficulty.capitalize(),
+                'subject': subject
+            },
+            'Chemistry': {
+                'concept': 'Catalyst',
+                'description': 'A substance that speeds up chemical reactions without being consumed, lowering the energy barrier needed for reactions to occur.',
+                'forbiddenWords': ['reaction', 'speed', 'chemical', 'enzyme', 'activation', 'energy'],
+                'difficulty': difficulty.capitalize(),
+                'subject': subject
+            }
+        }
+        
+        fallback = fallback_cards.get(subject, fallback_cards['Biology'])
+        return jsonify(fallback)
+
 # Create required directories and initialize app
 def create_app():
     os.makedirs(Config.BASE_DATA_DIR, exist_ok=True)
