@@ -83,18 +83,7 @@ export default function GamesPage() {
           </p>
           
           {/* Map Link */}
-          <div className="mt-8">
-            <Link href="/map">
-              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300">
-                <Target className="h-6 w-6 mr-3" />
-                🗺️ Enter Game Map
-                <span className="ml-2 text-xs bg-white/20 px-2 py-1 rounded-full">NEW!</span>
-              </Button>
-            </Link>
-            <p className="text-sm text-muted-foreground mt-2">
-              Navigate through subjects, unlock topics, and face epic boss battles!
-            </p>
-          </div>
+          
         </div>
 
         {/* Games Grid */}
