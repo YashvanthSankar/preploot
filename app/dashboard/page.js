@@ -21,7 +21,11 @@ import {
   Clock,
   ArrowRight,
   Sparkles,
-  Flame
+  Flame,
+  Crown,
+  Gamepad2,
+  Map,
+  Sword
 } from 'lucide-react';
 import { DailyCheckin } from '@/components/daily-checkin';
 
