@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { toast } from 'sonner'
-import { Zap, Brain, Target, Trophy, Clock, ArrowLeft, ArrowRight, CheckCircle, XCircle, Flame, Star } from 'lucide-react'
+import { Zap, Brain, Target, Trophy, Clock, ArrowLeft, ArrowRight, CheckCircle, XCircle, Flame, Star, RotateCcw } from 'lucide-react'
 
 export default function SynapseSurgePage() {
   const [gameState, setGameState] = useState('menu') // menu, playing, paused, gameOver
@@ -45,7 +45,7 @@ export default function SynapseSurgePage() {
     { value: 'geography', label: 'Geography', icon: '🌍' }
   ]
 
-  const gameModes = [
+  const gameModes = useMemo(() => [
     { 
       value: 'timed', 
       label: 'Timed Challenge', 
@@ -67,13 +67,89 @@ export default function SynapseSurgePage() {
       duration: 30,
       xpMultiplier: 1.2
     }
-  ]
+  ], [])
 
-  const difficulties = [
+  const difficulties = useMemo(() => [
     { value: 'easy', label: 'Novice', baseSpeed: 3000, xp: 10 },
     { value: 'medium', label: 'Expert', baseSpeed: 2000, xp: 15 },
     { value: 'hard', label: 'Master', baseSpeed: 1200, xp: 25 }
-  ]
+  ], [])
+
+  // Function declarations with useCallback for stable references
+  const endGame = useCallback(async () => {
+    setGameState('gameOver')
+    clearInterval(gameInterval.current)
+
+    // Calculate final stats
+    const accuracy = phraseHistory.length > 0 ? 
+      (phraseHistory.filter(p => p.isCorrect).length / phraseHistory.length) * 100 : 0
+
+    // Update session stats
+    setSessionStats(prev => ({
+      gamesPlayed: prev.gamesPlayed + 1,
+      totalScore: prev.totalScore + score,
+      bestScore: Math.max(prev.bestScore, score),
+      averageAccuracy: prev.gamesPlayed > 0 ? 
+        ((prev.averageAccuracy * prev.gamesPlayed) + accuracy) / (prev.gamesPlayed + 1) : accuracy,
+      conceptsMastered: prev.conceptsMastered + (bestStreak >= 10 ? 1 : 0)
+    }))
+
+    // Award XP based on performance
+    if (score > 0) {
+      const difficultyXP = difficulties.find(d => d.value === difficulty)?.xp || 15
+      const modeMultiplier = gameModes.find(m => m.value === gameMode)?.xpMultiplier || 1.0
+      const performanceMultiplier = Math.min(accuracy / 100, 1.0) // Based on accuracy
+      const streakBonus = bestStreak >= 20 ? 20 : bestStreak >= 10 ? 10 : bestStreak >= 5 ? 5 : 0
+      
+      const totalXP = Math.round((difficultyXP * modeMultiplier * performanceMultiplier) + streakBonus)
+
+      if (totalXP > 0) {
+        await fetch('/api/xp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'synapse_surge',
+            data: {
+              subject,
+              difficulty,
+              gameMode,
+              score,
+              accuracy,
+              bestStreak,
+              phrasesClassified: phraseHistory.length
+            }
+          })
+        })
+
+        toast.success(`Game complete! +${totalXP} XP earned! ⚡`)
+      }
+    }
+  }, [score, bestStreak, phraseHistory, subject, difficulty, gameMode, difficulties, gameModes])
+
+  const generateNextPhrase = useCallback(async () => {
+    if (!currentPair || gameState !== 'playing') return
+
+    try {
+      const response = await fetch('/api/games/synapse-surge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'get_phrase',
+          conceptPair: currentPair,
+          subject,
+          difficulty,
+          usedPhrases: phraseHistory.map(p => p.phrase)
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to get phrase')
+
+      const data = await response.json()
+      setCurrentPhrase(data.phrase)
+    } catch (error) {
+      console.error('Error generating phrase:', error)
+    }
+  }, [currentPair, gameState, subject, difficulty, phraseHistory])
 
   // Timer effect
   useEffect(() => {
@@ -90,7 +166,7 @@ export default function SynapseSurgePage() {
       }, 1000)
     }
     return () => clearInterval(timer)
-  }, [gameState, gameMode])
+  }, [gameState, gameMode, endGame])
 
   // Phrase generation effect
   useEffect(() => {
@@ -102,7 +178,7 @@ export default function SynapseSurgePage() {
       gameInterval.current = interval
       return () => clearInterval(interval)
     }
-  }, [gameState, currentPair, speed])
+  }, [gameState, currentPair, speed, generateNextPhrase])
 
   const startGame = async () => {
     setIsLoading(true)
@@ -142,31 +218,6 @@ export default function SynapseSurgePage() {
       toast.error('Failed to start game. Please try again.')
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const generateNextPhrase = async () => {
-    if (!currentPair || gameState !== 'playing') return
-
-    try {
-      const response = await fetch('/api/games/synapse-surge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'get_phrase',
-          conceptPair: currentPair,
-          subject,
-          difficulty,
-          usedPhrases: phraseHistory.map(p => p.phrase)
-        })
-      })
-
-      if (!response.ok) throw new Error('Failed to get phrase')
-
-      const data = await response.json()
-      setCurrentPhrase(data.phrase)
-    } catch (error) {
-      console.error('Error generating phrase:', error)
     }
   }
 
@@ -248,56 +299,6 @@ export default function SynapseSurgePage() {
     return basePoints + streakBonus + speedBonus
   }
 
-  const endGame = async () => {
-    setGameState('gameOver')
-    clearInterval(gameInterval.current)
-
-    // Calculate final stats
-    const accuracy = phraseHistory.length > 0 ? 
-      (phraseHistory.filter(p => p.isCorrect).length / phraseHistory.length) * 100 : 0
-
-    // Update session stats
-    setSessionStats(prev => ({
-      gamesPlayed: prev.gamesPlayed + 1,
-      totalScore: prev.totalScore + score,
-      bestScore: Math.max(prev.bestScore, score),
-      averageAccuracy: prev.gamesPlayed > 0 ? 
-        ((prev.averageAccuracy * prev.gamesPlayed) + accuracy) / (prev.gamesPlayed + 1) : accuracy,
-      conceptsMastered: prev.conceptsMastered + (bestStreak >= 10 ? 1 : 0)
-    }))
-
-    // Award XP based on performance
-    if (score > 0) {
-      const difficultyXP = difficulties.find(d => d.value === difficulty)?.xp || 15
-      const modeMultiplier = gameModes.find(m => m.value === gameMode)?.xpMultiplier || 1.0
-      const performanceMultiplier = Math.min(accuracy / 100, 1.0) // Based on accuracy
-      const streakBonus = bestStreak >= 20 ? 20 : bestStreak >= 10 ? 10 : bestStreak >= 5 ? 5 : 0
-      
-      const totalXP = Math.round((difficultyXP * modeMultiplier * performanceMultiplier) + streakBonus)
-
-      if (totalXP > 0) {
-        await fetch('/api/xp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'synapse_surge',
-            data: {
-              subject,
-              difficulty,
-              gameMode,
-              score,
-              accuracy,
-              bestStreak,
-              phrasesClassified: phraseHistory.length
-            }
-          })
-        })
-
-        toast.success(`Game complete! +${totalXP} XP earned! ⚡`)
-      }
-    }
-  }
-
   const pauseGame = () => {
     setGameState('paused')
     clearInterval(gameInterval.current)
@@ -327,24 +328,19 @@ export default function SynapseSurgePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-100 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Zap className="w-8 h-8 text-cyan-600" />
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-100 dark:from-background dark:via-background dark:to-muted/20 p-4">
+      {gameState === 'menu' && (
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-              Synapse Surge: The Concept Classifier
+              🧠 Synapse Surge
             </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-4 text-lg">
+              Think fast! Classify concepts in real-time brain training
+            </p>
           </div>
-          <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-            Lightning-fast concept differentiation! Rapidly classify phrases to train your mental agility 
-            for competitive exams. Speed increases as you improve!
-          </p>
-        </div>
 
-        {/* Game Menu */}
-        {gameState === 'menu' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Configuration */}
             <div className="space-y-6">
@@ -455,25 +451,25 @@ export default function SynapseSurgePage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-cyan-50 p-4 rounded-lg border-l-4 border-cyan-500">
-                      <h4 className="font-semibold text-cyan-800 mb-2">1. ⚡ Rapid Recognition</h4>
-                      <p className="text-cyan-700 text-sm">Two similar concepts appear at the top. Phrases flash at the bottom - classify them quickly!</p>
+                    <div className="bg-cyan-50 dark:bg-cyan-900/20 p-4 rounded-lg border-l-4 border-cyan-500">
+                      <h4 className="font-semibold text-cyan-800 dark:text-cyan-200 mb-2">1. ⚡ Rapid Recognition</h4>
+                      <p className="text-cyan-700 dark:text-cyan-300 text-sm">Two similar concepts appear at the top. Phrases flash at the bottom - classify them quickly!</p>
                     </div>
-                    <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                      <h4 className="font-semibold text-blue-800 mb-2">2. 🎯 Quick Decisions</h4>
-                      <p className="text-blue-700 text-sm">Click left or right to assign each phrase to the correct concept. Speed and accuracy matter!</p>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-500">
+                      <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">2. 🎯 Quick Decisions</h4>
+                      <p className="text-blue-700 dark:text-blue-300 text-sm">Click left or right to assign each phrase to the correct concept. Speed and accuracy matter!</p>
                     </div>
-                    <div className="bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-500">
-                      <h4 className="font-semibold text-indigo-800 mb-2">3. 🔥 Build Streaks</h4>
-                      <p className="text-indigo-700 text-sm">Consecutive correct answers build your streak multiplier and increase your score!</p>
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg border-l-4 border-indigo-500">
+                      <h4 className="font-semibold text-indigo-800 dark:text-indigo-200 mb-2">3. 🔥 Build Streaks</h4>
+                      <p className="text-indigo-700 dark:text-indigo-300 text-sm">Consecutive correct answers build your streak multiplier and increase your score!</p>
                     </div>
-                    <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
-                      <h4 className="font-semibold text-purple-800 mb-2">4. 📈 Adaptive Speed</h4>
-                      <p className="text-purple-700 text-sm">Game speeds up as you improve. In survival mode, mistakes end the game!</p>
+                    <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-500">
+                      <h4 className="font-semibold text-purple-800 dark:text-purple-200 mb-2">4. 📈 Adaptive Speed</h4>
+                      <p className="text-purple-700 dark:text-purple-300 text-sm">Game speeds up as you improve. In survival mode, mistakes end the game!</p>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-lg border">
+                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 p-6 rounded-lg border dark:border-gray-700">
                     <h3 className="font-bold text-lg mb-4 text-center">Example: Biology</h3>
                     <div className="text-center mb-4">
                       <div className="inline-flex gap-8">
@@ -485,42 +481,111 @@ export default function SynapseSurgePage() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300">
-                      <p className="text-center text-lg font-medium">
-                        "Results in four genetically unique daughter cells"
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                      <p className="text-center text-lg font-medium text-gray-900 dark:text-gray-100">
+                        &quot;Results in four genetically unique daughter cells&quot;
                       </p>
-                      <p className="text-center text-sm text-gray-600 mt-2">
+                      <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
                         Which concept does this describe? Choose quickly!
                       </p>
                     </div>
                   </div>
 
-                  <Button 
-                    variant="default"
-                    onClick={startGame}
-                    disabled={isLoading}
-                    className="w-full text-lg py-3"
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Loading Concepts...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Zap className="w-5 h-5" />
-                        Start Synapse Surge
-                      </div>
-                    )}
-                  </Button>
+                                    <div className="text-center mt-8">
+                    <Button 
+                      onClick={startGame} 
+                      disabled={isLoading}
+                      size="lg"
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Starting...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-5 h-5 mr-2" />
+                          Start Game
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Game Playing State */}
-        {gameState === 'playing' && currentPair && (
+      {/* Game Over State */}
+      {gameState === 'gameOver' && (
+        <Card className="max-w-2xl mx-auto bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50 dark:from-background dark:via-background dark:to-muted/20 border-2">
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Game Complete!
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="text-center">
+              <div className="text-6xl font-bold text-blue-600 mb-2">{score}</div>
+              <div className="text-lg text-gray-600 dark:text-gray-300">Final Score</div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-muted/50 p-4 rounded-lg text-center border dark:border-gray-700">
+                <div className="text-2xl font-bold text-green-600">{phraseHistory.filter(p => p.isCorrect).length}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Correct</div>
+              </div>
+              <div className="bg-white dark:bg-muted/50 p-4 rounded-lg text-center border dark:border-gray-700">
+                <div className="text-2xl font-bold text-red-600">{phraseHistory.filter(p => !p.isCorrect).length}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Wrong</div>
+              </div>
+              <div className="bg-white dark:bg-muted/50 p-4 rounded-lg text-center border dark:border-gray-700">
+                <div className="text-2xl font-bold text-blue-600">
+                  {phraseHistory.length > 0 ? Math.round((phraseHistory.filter(p => p.isCorrect).length / phraseHistory.length) * 100) : 0}%
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Accuracy</div>
+              </div>
+              <div className="bg-white dark:bg-muted/50 p-4 rounded-lg text-center border dark:border-gray-700">
+                <div className="text-2xl font-bold text-purple-600">{bestStreak}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Best Streak</div>
+              </div>
+            </div>
+
+            <div className="flex justify-center gap-4">
+              <Button onClick={resetGame} className="flex items-center gap-2">
+                <RotateCcw className="w-4 h-4" />
+                Play Again
+              </Button>
+              <Button onClick={resetGame} variant="outline">
+                Change Settings
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pause Modal */}
+      {gameState === 'paused' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Game Paused</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p>Your progress is saved. Take a break!</p>
+              <div className="flex justify-end gap-4">
+                <Button onClick={resumeGame}>Resume</Button>
+                <Button onClick={resetGame} variant="destructive">Quit</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Game Playing State */}
+      {gameState === 'playing' && currentPair && (
           <div className="space-y-6">
             {/* Game Header */}
             <Card>
@@ -597,13 +662,13 @@ export default function SynapseSurgePage() {
                 </div>
 
                 {/* Current Phrase */}
-                <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-10 rounded-2xl border-3 border-gradient-to-r border-indigo-200 min-h-[140px] flex items-center justify-center shadow-inner relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/30 via-purple-100/30 to-pink-100/30 rounded-2xl"></div>
+                <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900/30 dark:via-purple-900/30 dark:to-pink-900/30 p-10 rounded-2xl border-2 border-indigo-200 dark:border-indigo-700 min-h-[140px] flex items-center justify-center shadow-inner relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/30 via-purple-100/30 to-pink-100/30 dark:from-indigo-800/20 dark:via-purple-800/20 dark:to-pink-800/20 rounded-2xl"></div>
                   {currentPhrase ? (
                     <div className="relative z-10 text-center">
-                      <div className="text-sm font-semibold text-indigo-600 mb-2">CLASSIFY THIS PHRASE:</div>
-                      <p className="text-2xl lg:text-3xl font-bold text-gray-800 leading-relaxed max-w-4xl">
-                        "{currentPhrase.text}"
+                      <div className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-2">CLASSIFY THIS PHRASE:</div>
+                      <p className="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-gray-100 leading-relaxed max-w-4xl">
+                        &quot;{currentPhrase.text}&quot;
                       </p>
                       <div className="mt-3 flex items-center justify-center gap-2">
                         <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
@@ -612,8 +677,8 @@ export default function SynapseSurgePage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="relative z-10 flex items-center gap-3 text-gray-600">
-                      <div className="w-8 h-8 border-3 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                    <div className="relative z-10 flex items-center gap-3 text-gray-600 dark:text-gray-400">
+                      <div className="w-8 h-8 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
                       <span className="text-lg font-medium">Loading next phrase...</span>
                     </div>
                   )}
@@ -622,7 +687,7 @@ export default function SynapseSurgePage() {
                 {/* Speed Indicator */}
                 <div className="mt-4 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-sm text-gray-600">Speed:</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Speed:</span>
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map(level => (
                         <div
@@ -630,7 +695,7 @@ export default function SynapseSurgePage() {
                           className={`w-3 h-3 rounded-full ${
                             speedMultiplier.current >= level 
                               ? 'bg-orange-500' 
-                              : 'bg-gray-200'
+                              : 'bg-gray-200 dark:bg-gray-600'
                           }`}
                         />
                       ))}
@@ -672,69 +737,6 @@ export default function SynapseSurgePage() {
             )}
           </div>
         )}
-
-        {/* Paused State */}
-        {gameState === 'paused' && (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold mb-4">Game Paused</h2>
-              <div className="flex items-center justify-center gap-4">
-                <Button onClick={resumeGame} variant="default">
-                  Resume Game
-                </Button>
-                <Button onClick={resetGame} variant="outline">
-                  End Game
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Game Over State */}
-        {gameState === 'gameOver' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center text-2xl">Game Complete!</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div className="bg-yellow-50 p-4 rounded-lg">
-                  <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-yellow-600">{score}</p>
-                  <p className="text-sm text-gray-600">Final Score</p>
-                </div>
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <Flame className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-orange-600">{bestStreak}</p>
-                  <p className="text-sm text-gray-600">Best Streak</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <Target className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-green-600">
-                    {phraseHistory.length > 0 ? 
-                      Math.round((phraseHistory.filter(p => p.isCorrect).length / phraseHistory.length) * 100) : 0}%
-                  </p>
-                  <p className="text-sm text-gray-600">Accuracy</p>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <Zap className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-blue-600">{phraseHistory.length}</p>
-                  <p className="text-sm text-gray-600">Classifications</p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center gap-4">
-                <Button onClick={startGame} variant="default">
-                  Play Again
-                </Button>
-                <Button onClick={resetGame} variant="outline">
-                  Change Settings
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
     </div>
   )
 }

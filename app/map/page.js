@@ -443,7 +443,7 @@ export default function GameMapPage() {
     if (session?.user) {
       fetchUserProgress()
     }
-  }, [session, selectedExam, selectedSubject])
+  }, [session, selectedExam, selectedSubject, fetchUserProgress])
 
   const fetchUserProgress = async () => {
     try {

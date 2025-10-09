@@ -1,19 +1,16 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth-provider";
 import { Header } from "@/components/header";
 import RAGChatbot from "@/components/rag-chatbot";
 import { Toaster } from "sonner";
+import ParticleBackground from "@/components/particle-background";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const pixelify = Pixelify_Sans({
+  variable: "--font-pixelify",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata = {
@@ -25,7 +22,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-background via-background to-primary/5`}
+        className={`${pixelify.variable} antialiased bg-gradient-to-br from-background via-background to-primary/5`}
       >
         <ThemeProvider
           attribute="class"
@@ -34,6 +31,7 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           <AuthProvider>
+            <ParticleBackground />
             <Header />
             {children}
             <RAGChatbot />

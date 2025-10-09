@@ -22,6 +22,13 @@ export default function CaseCrackerPage() {
   const [timeLeft, setTimeLeft] = useState(300) // 5 minutes
   const [timerActive, setTimerActive] = useState(false)
 
+  const handleTimeUp = () => {
+    setTimerActive(false)
+    if (!feedback) {
+      toast.warning('Time\'s up! Submit your current solution or generate a new case.')
+    }
+  }
+
   // Timer effect
   useEffect(() => {
     let interval = null
@@ -33,7 +40,7 @@ export default function CaseCrackerPage() {
       handleTimeUp()
     }
     return () => clearInterval(interval)
-  }, [timerActive, timeLeft])
+  }, [timerActive, timeLeft, handleTimeUp])
 
   const subjects = [
     { value: 'physics', label: 'Physics', icon: '⚡' },
@@ -143,13 +150,6 @@ export default function CaseCrackerPage() {
       toast.error('Failed to evaluate answer. Please try again.')
     } finally {
       setIsSubmitting(false)
-    }
-  }
-
-  const handleTimeUp = () => {
-    setTimerActive(false)
-    if (!feedback) {
-      toast.warning('Time\'s up! Submit your current solution or generate a new case.')
     }
   }
 

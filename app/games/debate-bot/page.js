@@ -389,7 +389,7 @@ export default function DebateBotPage() {
                     <h3 className="font-bold text-indigo-800 mb-2">{currentDebate.topic}</h3>
                     <p className="text-indigo-700 mb-3">{currentDebate.context}</p>
                     <div className="bg-white p-3 rounded border">
-                      <p className="text-sm text-gray-600 mb-1">Bot's Position:</p>
+                      <p className="text-sm text-gray-600 mb-1">Bot&apos;s Position:</p>
                       <p className="font-medium text-gray-800">{currentDebate.botPosition}</p>
                     </div>
                   </div>
@@ -562,7 +562,7 @@ export default function DebateBotPage() {
                     </div>
                     <div className="bg-purple-50 p-4 rounded-lg">
                       <h4 className="font-semibold text-purple-800 mb-2">2. ⚔️ Present Arguments</h4>
-                      <p className="text-purple-700 text-sm">Counter the AI's position with evidence-based reasoning and logical arguments.</p>
+                      <p className="text-purple-700 text-sm">Counter the AI&apos;s position with evidence-based reasoning and logical arguments.</p>
                     </div>
                     <div className="bg-pink-50 p-4 rounded-lg">
                       <h4 className="font-semibold text-pink-800 mb-2">3. 🔄 Dynamic Exchange</h4>

@@ -145,17 +145,8 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:from-background dark:via-background dark:to-primary/10">
       <div className="container mx-auto px-4 py-6 space-y-6">
         
-        {/* Gamified Header */}
         <div className="text-center space-y-2 mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-br from-primary via-purple-500 to-pink-500 rounded-full shadow-lg">
-              <Crown className="h-8 w-8 text-white" />
-            </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              Command Center
-            </h1>
-          </div>
-          <p className="text-muted-foreground">Your learning kingdom awaits, {session?.user?.name || 'Champion'}!</p>
+          <p className="text-muted-foreground">Welcome back, {session?.user?.name || 'Champion'}!</p>
         </div>
 
         {/* Compact Stats Row */}

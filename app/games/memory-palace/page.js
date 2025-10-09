@@ -418,7 +418,7 @@ export default function AIMemoryPalaceGame() {
             
             <h2 className="text-3xl font-bold mb-4">Building Your Memory Palace...</h2>
             <p className="text-muted-foreground mb-8">
-              AI is crafting the perfect memory aid for "{userConcept}"
+              AI is crafting the perfect memory aid for &quot;{userConcept}&quot;
             </p>
             
             <div className="space-y-4">
@@ -452,7 +452,7 @@ export default function AIMemoryPalaceGame() {
                 </div>
               </div>
               <h2 className="text-3xl font-bold mb-2">Your Memory Palace is Ready!</h2>
-              <p className="text-muted-foreground">Here's your personalized memory aid for: <strong>{userConcept}</strong></p>
+              <p className="text-muted-foreground">Here&apos;s your personalized memory aid for: <strong>{userConcept}</strong></p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -576,7 +576,7 @@ export default function AIMemoryPalaceGame() {
             
             <h2 className="text-3xl font-bold mb-4">Memory Palace Saved! 🏰</h2>
             <p className="text-muted-foreground mb-8">
-              Your memory aid for "{userConcept}" has been added to your collection
+              Your memory aid for &quot;{userConcept}&quot; has been added to your collection
             </p>
             
             <div className="flex gap-4 justify-center">

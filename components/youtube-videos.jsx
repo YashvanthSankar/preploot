@@ -72,27 +72,21 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
         setError(data.error);
       } else {
         const videoList = data.videos || [];
-        // Normalize video IDs to ensure they're strings
-        const normalizedVideos = videoList.map(video => ({
-          ...video,
-          videoId: video.id?.videoId || video.id || video.videoId || 'unknown'
-        }));
-        
-        setVideos(normalizedVideos);
+        setVideos(videoList);
         setDataSource(data.source);
         
         // Initialize state with the highest quality thumbnail
-        const initialSrcs = normalizedVideos.reduce((acc, video) => {
-          acc[video.videoId] = `https://img.youtube.com/vi/${video.videoId}/${THUMBNAIL_QUALITIES[0]}.jpg`;
+        const initialSrcs = videoList.reduce((acc, video) => {
+          acc[video.id] = `https://img.youtube.com/vi/${video.id}/${THUMBNAIL_QUALITIES[0]}.jpg`;
           return acc;
         }, {});
         setThumbnailSrcs(initialSrcs);
-        setImageLoadStates(normalizedVideos.reduce((acc, video) => {
-             acc[video.videoId] = 'loading'; // Explicitly set initial loading state
+        setImageLoadStates(videoList.reduce((acc, video) => {
+             acc[video.id] = 'loading'; // Explicitly set initial loading state
              return acc;
         }, {}));
         
-        console.log('🎬 Loaded videos:', normalizedVideos.length);
+        console.log('🎬 Loaded videos:', videoList.length);
       }
     } catch (err) {
       setError('Failed to load videos');
@@ -120,7 +114,7 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
   const handleWatchVideo = (video) => {
     const title = video.snippet?.title || video.title || 'Untitled Video';
     const channelTitle = video.snippet?.channelTitle || video.channelTitle || 'Unknown Channel';
-    const videoId = video.videoId || 'unknown';
+    const videoId = video.id?.videoId || video.id || 'unknown';
     
     const params = new URLSearchParams({
       title: encodeURIComponent(title),
@@ -133,12 +127,6 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
     router.push(`/video/${videoId}?${params.toString()}`);
   };
 
-  // Auto-fetch videos when component becomes visible
-  useEffect(() => {
-    if (isVisible && exam && subject && videos.length === 0) {
-      fetchVideos();
-    }
-  }, [isVisible, exam, subject]);
 
   if (!isVisible) return null;
 
@@ -181,12 +169,12 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
         {!loading && !error && videos.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {videos.map((video, index) => {
-              const currentThumbnailSrc = thumbnailSrcs[video.videoId];
+              const currentThumbnailSrc = thumbnailSrcs[video.id];
 
               return (
-              <Card key={video.videoId} className="hover:shadow-lg transition-shadow duration-200">
+              <Card key={video.id} className="hover:shadow-lg transition-shadow duration-200">
                 <div className="relative group cursor-pointer" onClick={() => handleWatchVideo(video)}>
-                  {imageLoadStates[video.videoId] === 'error' ? (
+                  {imageLoadStates[video.id] === 'error' ? (
                     // Fallback UI when all retries have failed
                     <div className="w-full h-48 bg-gradient-to-br from-red-600 via-red-500 to-red-700 rounded-t-lg flex items-center justify-center relative overflow-hidden">
                       <div className="absolute inset-0 opacity-10">
@@ -209,7 +197,7 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
                     // Thumbnail attempt block
                     <>
                       {/* Loading placeholder */}
-                      {imageLoadStates[video.videoId] !== 'loaded' && (
+                      {imageLoadStates[video.id] !== 'loaded' && (
                         <div className="absolute inset-0 w-full h-48 bg-gradient-to-br from-gray-300 to-gray-400 rounded-t-lg flex items-center justify-center z-20">
                           <div className="text-center">
                             <div className="animate-pulse">
@@ -223,10 +211,10 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
                       {/* Actual image */}
                       <img 
                         // CRITICAL FIX: Use state for the src
-                        src={currentThumbnailSrc || `https://img.youtube.com/vi/${video.videoId}/default.jpg`} 
+                        src={currentThumbnailSrc || `https://img.youtube.com/vi/${video.id}/default.jpg`} 
                         alt={video.title}
                         className={`w-full h-48 object-cover rounded-t-lg transition-opacity duration-500 ${
-                          imageLoadStates[video.videoId] === 'loaded' ? 'opacity-100' : 'opacity-0'
+                          imageLoadStates[video.id] === 'loaded' ? 'opacity-100' : 'opacity-0'
                         } ${currentThumbnailSrc ? '' : 'hidden'}`} // Hide if src hasn't been initialized yet
                         loading="eager"
                         crossOrigin="anonymous"
@@ -236,9 +224,9 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
                           backgroundColor: '#1a1a1a',
                           minHeight: '192px'
                         }}
-                        onLoad={() => handleImageLoad(video.videoId)}
+                        onLoad={() => handleImageLoad(video.id)}
                         // CRITICAL FIX: Pass the current src to the handler
-                        onError={(e) => handleImageError(video.videoId, e.target.src)} 
+                        onError={(e) => handleImageError(video.id, e.target.src)} 
                       />
 
                       {/* Overlay and Badge */}

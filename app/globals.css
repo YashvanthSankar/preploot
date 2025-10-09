@@ -60,34 +60,38 @@
   --font-pixelify: 'Pixelify Sans', sans-serif;
   --font-vt323: 'VT323', monospace;
   --font-share-tech: 'Share Tech Mono', monospace;
-  --radius: 0.625rem;
+  --radius: 0.5rem;
+
+  /* Light Mode - Day Scholar */
+  --background: 210 10% 98%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 210 10% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 210 10% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
   
-  /* Light Mode - Clean & Professional */
-  --background: oklch(0.98 0 0); /* Soft off-white */
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0); /* Clean white cards */
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  /* Gamified Primary Colors - Rich Deep Azure */
+  --primary: 220 80% 45%;
+  --primary-foreground: 210 40% 98%;
   
-  /* Gamified Primary Colors - Rich Royal Blue */
-  --primary: oklch(0.45 0.2 240); /* Rich royal blue for XP/Progress */
-  --primary-foreground: oklch(0.985 0 0);
-  --xp: oklch(0.45 0.2 240); /* Same as primary - XP color */
-  --streak: oklch(0.6 0.25 60); /* Golden yellow for streaks */
-  --level: oklch(0.55 0.3 300); /* Purple for levels */
-  --success: oklch(0.6 0.15 140); /* Gentle lime green for success */
+  /* Accent Color - Vibrant Orange/Gold */
+  --accent: 35 95% 60%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+
+  --xp: 220 80% 45%;
+  --streak: 35 95% 60%;
+  --level: 300 80% 60%;
+  --success: 140 80% 45%;
   
-  --secondary: oklch(0.96 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.96 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0 0); /* Subtle gray borders */
-  --input: oklch(0.98 0 0);
-  --ring: oklch(0.45 0.2 240); /* Match primary for focus rings */
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 220 80% 45%;
   
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -95,58 +99,62 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.45 0.2 240);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.96 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.9 0 0);
-  --sidebar-ring: oklch(0.45 0.2 240);
+  --sidebar: 210 10% 98%;
+  --sidebar-foreground: 222.2 84% 4.9%;
+  --sidebar-primary: 220 80% 45%;
+  --sidebar-primary-foreground: 210 40% 98%;
+  --sidebar-accent: 210 40% 96.1%;
+  --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+  --sidebar-border: 214.3 31.8% 91.4%;
+  --sidebar-ring: 220 80% 45%;
 }
 
 .dark {
-  /* Dark Mode - Vibrant & Engaging */
-  --background: oklch(0.08 0 0); /* Deep dark gray, not pure black */
-  --foreground: oklch(0.985 0 0); /* Pure white text */
-  --card: oklch(0.12 0 0); /* Slightly lighter for depth */
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  /* Dark Mode - Night Coder */
+  --background: 220 20% 10%;
+  --foreground: 210 40% 98%;
+  --card: 220 20% 12%;
+  --card-foreground: 210 40% 98%;
+  --popover: 220 20% 10%;
+  --popover-foreground: 210 40% 98%;
   
-  /* Gamified Primary Colors - Electric Blue */
-  --primary: oklch(0.7 0.3 240); /* Electric blue for XP/Progress */
-  --primary-foreground: oklch(0.08 0 0);
-  --xp: oklch(0.7 0.3 240); /* Electric blue for XP */
-  --streak: oklch(0.8 0.25 60); /* Bright gold for streaks */
-  --level: oklch(0.75 0.35 300); /* Bright violet for levels */
-  --success: oklch(0.75 0.3 140); /* Neon green for success */
+  /* Gamified Primary Colors - Electric Cyan/Blue */
+  --primary: 200 90% 55%;
+  --primary-foreground: 220 20% 10%;
+
+  /* Accent Color - Neon Yellow/Gold */
+  --accent: 45 100% 65%;
+  --accent-foreground: 220 20% 10%;
+
+  --xp: 200 90% 55%;
+  --streak: 45 100% 65%;
+  --level: 300 90% 70%;
+  --success: 140 90% 55%;
   
-  --secondary: oklch(0.16 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.16 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.16 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.2 0 0); /* Subtle dark borders */
-  --input: oklch(0.16 0 0);
-  --ring: oklch(0.7 0.3 240); /* Match primary */
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 200 90% 55%;
   
-  --chart-1: oklch(0.7 0.3 240);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --chart-1: 200 90% 55%;
+  --chart-2: 160 90% 55%;
+  --chart-3: 45 100% 65%;
+  --chart-4: 300 90% 70%;
+  --chart-5: 20 90% 55%;
   
-  --sidebar: oklch(0.12 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.7 0.3 240);
-  --sidebar-primary-foreground: oklch(0.08 0 0);
-  --sidebar-accent: oklch(0.16 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.2 0 0);
-  --sidebar-ring: oklch(0.7 0.3 240);
+  --sidebar: 220 20% 12%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: 200 90% 55%;
+  --sidebar-primary-foreground: 220 20% 10%;
+  --sidebar-accent: 217.2 32.6% 17.5%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-border: 217.2 32.6% 17.5%;
+  --sidebar-ring: 200 90% 55%;
 }
 @layer base {
   * {
@@ -154,7 +162,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-pixelify), sans-serif;
   }
 }
 

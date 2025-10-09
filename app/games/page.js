@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Gamepad2, Brain, Target, Trophy, Castle, FileText, MessageSquare, Zap } from "lucide-react"
+import { Gamepad2, Brain, Target, Trophy, Castle, FileText, MessageSquare, Zap, Sword, Shield, Gem } from "lucide-react"
 import Link from "next/link"
 
 export default function GamesPage() {
@@ -14,7 +14,7 @@ export default function GamesPage() {
       title: "AI Taboo",
       subtitle: "The Forbidden Words Challenge",
       description: "Guess the concept while avoiding forbidden words. Test your deep understanding!",
-      icon: Brain,
+      icon: Gem, // Changed from Brain
       difficulty: "Medium",
       players: "1 Player",
       category: "Concept Learning",
@@ -36,7 +36,7 @@ export default function GamesPage() {
       title: "Case Cracker",
       subtitle: "The Scenario Simulator",
       description: "Solve real-world problems using your knowledge. Bridge theory and practice with critical thinking!",
-      icon: FileText,
+      icon: Shield, // Changed from FileText
       difficulty: "Variable",
       players: "1 Player", 
       category: "Critical Thinking",
@@ -47,7 +47,7 @@ export default function GamesPage() {
       title: "Debate the Bot",
       subtitle: "The Logic Arena",
       description: "Engage in structured academic debates with AI. Develop argumentation skills and evidence-based reasoning!",
-      icon: MessageSquare,
+      icon: Sword, // Changed from MessageSquare
       difficulty: "Variable",
       players: "1 Player",
       category: "Argumentation",
@@ -91,7 +91,10 @@ export default function GamesPage() {
           {games.map((game) => {
             const IconComponent = game.icon
             return (
-              <Card key={game.id} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/50 relative overflow-hidden">
+              <Card 
+                key={game.id} 
+                className="group hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-primary/50 relative overflow-hidden bg-card/50 backdrop-blur-sm"
+              >
                 {game.comingSoon && (
                   <div className="absolute top-4 right-4 z-10">
                     <Badge variant="secondary" className="text-xs">
@@ -100,17 +103,14 @@ export default function GamesPage() {
                   </div>
                 )}
                 
-                {/* Color accent */}
-                <div className={`h-2 ${game.color}`} />
-                
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg ${game.color}/10`}>
-                        <IconComponent className={`h-6 w-6 text-white`} style={{color: game.color.replace('bg-', '').replace('-500', '')}} />
+                    <div className="flex items-center space-x-4">
+                      <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 group-hover:border-primary/50 group-hover:bg-primary/20 transition-all">
+                        <IconComponent className="h-7 w-7 text-primary" />
                       </div>
                       <div>
-                        <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                        <CardTitle className="text-xl font-orbitron group-hover:text-primary transition-colors">
                           {game.title}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground font-medium">
@@ -122,20 +122,14 @@ export default function GamesPage() {
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {game.description}
                   </p>
                   
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {game.difficulty}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {game.players}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {game.category}
-                    </Badge>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <Badge variant="outline" className="text-xs border-accent/30 bg-accent/10 text-accent-foreground">{game.difficulty}</Badge>
+                    <Badge variant="outline" className="text-xs">{game.players}</Badge>
+                    <Badge variant="outline" className="text-xs">{game.category}</Badge>
                   </div>
                   
                   {game.comingSoon ? (
@@ -144,7 +138,7 @@ export default function GamesPage() {
                     </Button>
                   ) : (
                     <Link href={`/games/${game.id}`} className="block">
-                      <Button variant="default" className="w-full">
+                      <Button variant="default" className="w-full font-bold">
                         Play Now
                       </Button>
                     </Link>

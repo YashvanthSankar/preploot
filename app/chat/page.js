@@ -45,7 +45,7 @@ export default function ChatPage() {
     if (session?.user?.id) {
       loadUploadedFiles();
     }
-  }, [session]);
+  }, [session, loadUploadedFiles]);
 
   const loadUploadedFiles = async () => {
     try {

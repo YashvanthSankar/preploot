@@ -12,6 +12,7 @@ export function Header() {
   const { data: session } = useSession()
   const [userStats, setUserStats] = useState({ xp: 0, streak: 0 })
   const [loading, setLoading] = useState(false)
+  const [xpChanged, setXpChanged] = useState(false)
 
   useEffect(() => {
     if (session?.user) {
@@ -68,7 +69,13 @@ export function Header() {
 
   // Function to update XP in real-time (can be called from other components)
   const updateXP = (newXP, newStreak) => {
-    setUserStats({ xp: newXP, streak: newStreak })
+    setUserStats(prevStats => {
+      if (newXP > prevStats.xp) {
+        setXpChanged(true)
+        setTimeout(() => setXpChanged(false), 600) // Animation duration
+      }
+      return { xp: newXP, streak: newStreak }
+    })
   }
 
   // Make updateXP available globally
@@ -106,13 +113,19 @@ export function Header() {
           {/* XP Display */}
           {session?.user && (
             <div className="hidden sm:flex items-center space-x-3">
-              <Badge variant="outline" className="flex items-center space-x-1 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all">
-                <Zap className="h-3 w-3 text-purple-600" />
-                <span className="text-purple-700 font-semibold">{loading ? '...' : userStats.xp} XP</span>
+              <Badge 
+                variant="outline" 
+                className={`flex items-center space-x-1.5 px-3 py-1.5 border-primary/50 bg-primary/10 text-primary-foreground transition-all ${xpChanged ? 'animate-pulse-glow' : ''}`}
+              >
+                <Zap className="h-4 w-4 text-primary" />
+                <span className="font-orbitron font-bold text-sm text-primary">{loading ? '...' : userStats.xp} XP</span>
               </Badge>
-              <Badge variant="outline" className="flex items-center space-x-1 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200 hover:from-orange-100 hover:to-orange-200 transition-all">
-                <Flame className="h-3 w-3 text-orange-600" />
-                <span className="text-orange-700 font-semibold">{loading ? '...' : userStats.streak}</span>
+              <Badge 
+                variant="outline" 
+                className="flex items-center space-x-1.5 px-3 py-1.5 border-accent/50 bg-accent/10 text-accent-foreground transition-all"
+              >
+                <Flame className="h-4 w-4 text-accent" />
+                <span className="font-orbitron font-bold text-sm text-accent">{loading ? '...' : userStats.streak}</span>
               </Badge>
             </div>
           )}

@@ -1,11 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Footer } from "@/components/footer";
-import { GamingNavigation } from "@/components/gaming-navigation";
-import { GamingButton } from "@/components/gaming-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, Clock, CheckCircle, XCircle, Trophy, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -244,12 +243,12 @@ export default function QuizPage() {
                   <CardContent className="space-y-4">
                     <p className="text-muted-foreground">{error}</p>
                     <div className="flex gap-4 justify-center">
-                      <GamingButton type="outline" onClick={() => router.back()}>
+                      <Button variant="outline" onClick={() => router.back()}>
                         Go Back
-                      </GamingButton>
-                      <GamingButton type="primary" onClick={() => window.location.reload()}>
+                      </Button>
+                      <Button onClick={() => window.location.reload()}>
                         Try Again
-                      </GamingButton>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -369,7 +368,7 @@ export default function QuizPage() {
                 </div>
 
                 <div className="flex gap-4 justify-center">
-                  <GamingButton type="primary" variant="default" onClick={() => {
+                  <Button variant="default" onClick={() => {
                     // Reset quiz
                     setCurrentQuestion(0);
                     setSelectedAnswer(null);
@@ -379,20 +378,20 @@ export default function QuizPage() {
                     setQuizCompleted(false);
                   }}>
                     Retake Quiz
-                  </GamingButton>
+                  </Button>
                   
                   {currentTopic ? (
-                    <GamingButton type="outline" onClick={() => {
+                    <Button variant="outline" onClick={() => {
                       router.push(`/topic?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(currentTopic)}`);
                     }}>
                       Back to Topic
-                    </GamingButton>
+                    </Button>
                   ) : (
-                    <GamingButton type="outline" onClick={() => {
+                    <Button variant="outline" onClick={() => {
                       router.push(`/subject?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}`);
                     }}>
                       Back to Subject
-                    </GamingButton>
+                    </Button>
                   )}
                 </div>
               </CardContent>
@@ -406,13 +405,12 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <GamingNavigation customTitle="Quiz Challenge" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
           {/* Quiz Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <GamingButton type="ghost" 
+              <Button type="ghost" 
                 onClick={() => {
                   if (currentTopic) {
                     router.push(`/topic?exam=${encodeURIComponent(examData.name)}&subject=${encodeURIComponent(currentSubject)}&topic=${encodeURIComponent(currentTopic)}`);
@@ -423,7 +421,7 @@ export default function QuizPage() {
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
-              </GamingButton>
+              </Button>
               
               <div className="flex items-center gap-4">
                 <div className="flex items-center text-orange-600">
@@ -464,7 +462,7 @@ export default function QuizPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {quizQuestions[currentQuestion].options.map((option, index) => (
-                <GamingButton
+                <Button
                   key={index}
                   type={selectedAnswer === index ? "primary" : "outline"}
                   className="w-full text-left justify-start h-auto p-4"
@@ -480,31 +478,31 @@ export default function QuizPage() {
                     </div>
                     <span>{option}</span>
                   </div>
-                </GamingButton>
+                </Button>
               ))}
             </CardContent>
           </Card>
 
           {/* Navigation Buttons */}
           <div className="flex justify-between">
-            <GamingButton type="outline" 
+            <Button variant="outline" 
               onClick={handlePreviousQuestion}
               disabled={currentQuestion === 0}
             >
               Previous
-            </GamingButton>
+            </Button>
             
             <div className="flex gap-4">
-              <GamingButton type="outline" onClick={handleSubmitQuiz}>
+              <Button variant="outline" onClick={handleSubmitQuiz}>
                 Submit Quiz
-              </GamingButton>
+              </Button>
               
-              <GamingButton type="primary" 
+              <Button 
                 onClick={handleNextQuestion}
                 disabled={selectedAnswer === null}
               >
                 {currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
-              </GamingButton>
+              </Button>
             </div>
           </div>
         </div>

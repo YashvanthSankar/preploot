@@ -172,7 +172,7 @@ export default function BossFightPage() {
       // Time's up - boss attacks
       handleTimeUp()
     }
-  }, [timeLeft, gameState, showResult])
+  }, [timeLeft, gameState, showResult, handleTimeUp])
 
   const handleTimeUp = () => {
     setPlayerHealth(prev => Math.max(0, prev - 20))

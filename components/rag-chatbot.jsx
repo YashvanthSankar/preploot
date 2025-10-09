@@ -28,6 +28,8 @@ import { toast } from 'sonner';
 export default function RAGChatbot() {
   const { data: session } = useSession();
   const router = useRouter();
+  
+  // State variables
   const [isOpen, setIsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeTab, setActiveTab] = useState('chat'); // 'chat' or 'upload'
@@ -46,13 +48,6 @@ export default function RAGChatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Load uploaded files when opened
-  useEffect(() => {
-    if (isOpen && session?.user?.id) {
-      loadUploadedFiles();
-    }
-  }, [isOpen, session]);
-
   const loadUploadedFiles = async () => {
     try {
       const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/files`);
@@ -64,6 +59,13 @@ export default function RAGChatbot() {
       console.error('Error loading files:', error);
     }
   };
+
+  // Load uploaded files when opened
+  useEffect(() => {
+    if (isOpen && session?.user?.id) {
+      loadUploadedFiles();
+    }
+  }, [isOpen, session]);
 
   const handleFileUpload = async (files) => {
     if (!session?.user?.id) return;
@@ -184,7 +186,14 @@ export default function RAGChatbot() {
     toast.success('Chat cleared');
   };
 
-  if (!session) return null;
+  const handleChatButtonClick = () => {
+    if (!session) {
+      toast.error('Please login to use Preploot AI');
+      router.push('/login');
+      return;
+    }
+    setIsOpen(true);
+  };
 
   return (
     <>
@@ -193,23 +202,24 @@ export default function RAGChatbot() {
         className="fixed bottom-6 right-6 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ delay: 1 }}
+        transition={{ delay: 0 }}
       >
         <Button
-          onClick={() => setIsOpen(true)}
+          onClick={handleChatButtonClick}
           className="h-14 px-6 rounded-full bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 shadow-2xl border-4 border-background text-white font-semibold transition-all duration-300 hover:shadow-purple-500/25"
           size="lg"
+          title="Preploot AI Assistant - Click to chat!"
         >
           <MessageCircle className="h-6 w-6 mr-3" />
           <span className="text-sm text-white font-bold">
-            Preploot AI
+            Preploot AI ✨
           </span>
         </Button>
       </motion.div>
 
       {/* Chat Window */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && session && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 100 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

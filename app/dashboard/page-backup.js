@@ -294,7 +294,7 @@ export default function Dashboard() {
               <div>
                 <h3 className="font-bold text-lg">Level {stats.level} Reached!</h3>
                 <p className="text-muted-foreground">
-                  You&apos;ve earned {stats.totalXP} XP and unlocked new learning challenges!
+                  You've earned {stats.totalXP} XP and unlocked new learning challenges!
                 </p>
               </div>
             </div>
