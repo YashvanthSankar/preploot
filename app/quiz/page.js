@@ -74,13 +74,12 @@ export default function QuizPage() {
       const userId = session.user.email.replace('@', '_').replace(/\./g, '_');
       const cacheId = `yt_${userId}_${videoId}`;
 
-      const response = await fetch(`http://localhost:5000/api/user/${userId}/generate/quiz`, {
+      const response = await fetch(`/api/user/${userId}/generate/quiz`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          cache_id: cacheId,
           num_questions: 10,
           difficulty: 'mixed',
         }),
@@ -93,14 +92,14 @@ export default function QuizPage() {
       const data = await response.json();
       
       console.log('DEBUG: Raw response from backend:', data);
-      console.log('DEBUG: Quiz array:', data.quiz);
-      console.log('DEBUG: Quiz length:', data.quiz?.length);
+      console.log('DEBUG: Questions array:', data.questions);
+      console.log('DEBUG: Questions length:', data.questions?.length);
       
-      if (data.quiz && data.quiz.length > 0) {
-        console.log('DEBUG: First question from backend:', data.quiz[0]);
+      if (data.questions && data.questions.length > 0) {
+        console.log('DEBUG: First question from backend:', data.questions[0]);
         
         // Convert backend format to frontend format
-        const formattedQuestions = data.quiz.map(q => ({
+        const formattedQuestions = data.questions.map(q => ({
           question: q.question,
           options: q.options,
           correct: q.options.indexOf(q.answer),

@@ -13,6 +13,9 @@ export const authOptions = {
           access_type: "offline",
           response_type: "code"
         }
+      },
+      httpOptions: {
+        timeout: 10000, // 10 seconds timeout
       }
     }),
     GitHubProvider({
@@ -45,6 +48,9 @@ export const authOptions = {
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  pages: {
+    error: '/login', // Redirect to login page on error
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",

@@ -158,10 +158,10 @@ export default function Home() {
                 </CardHeader>
               </Card>
               
-              <Card className="p-6 hover:shadow-lg transition-shadow duration-300 border-orange-500/20 hover:border-orange-500/40">
+              <Card className="p-6 hover:shadow-lg transition-shadow duration-300 border-primary/20 hover:border-primary/40">
                 <CardHeader className="pb-4">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-orange-500/10 rounded-2xl flex items-center justify-center">
-                    <Trophy className="h-8 w-8 text-orange-500" />
+                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center">
+                    <Trophy className="h-8 w-8 text-primary" />
                   </div>
                   <CardTitle className="text-xl font-bold">Gamification</CardTitle>
                   <CardDescription className="text-base">
@@ -170,10 +170,10 @@ export default function Home() {
                 </CardHeader>
               </Card>
               
-              <Card className="p-6 hover:shadow-lg transition-shadow duration-300 border-yellow-500/20 hover:border-yellow-500/40">
+              <Card className="p-6 hover:shadow-lg transition-shadow duration-300 border-primary/20 hover:border-primary/40">
                 <CardHeader className="pb-4">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-yellow-500/10 rounded-2xl flex items-center justify-center">
-                    <Zap className="h-8 w-8 text-yellow-500" />
+                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center">
+                    <Zap className="h-8 w-8 text-primary" />
                   </div>
                   <CardTitle className="text-xl font-bold">Progress Tracking</CardTitle>
                   <CardDescription className="text-base">

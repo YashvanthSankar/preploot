@@ -41,7 +41,6 @@ export default function RAGChatbot() {
   
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const FLASK_BASE_URL = 'http://localhost:5000';
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
@@ -50,7 +49,7 @@ export default function RAGChatbot() {
 
   const loadUploadedFiles = async () => {
     try {
-      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/files`);
+      const response = await fetch(`/api/user/${session.user.id}/files`);
       if (response.ok) {
         const data = await response.json();
         setUploadedFiles(data.files || []);
@@ -82,7 +81,7 @@ export default function RAGChatbot() {
     setIsLoading(true);
     
     try {
-      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/upload/pdf`, {
+      const response = await fetch(`/api/user/${session.user.id}/upload/pdf`, {
         method: 'POST',
         body: formData,
       });
@@ -145,7 +144,7 @@ export default function RAGChatbot() {
     setIsLoading(true);
     
     try {
-      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/chat`, {
+      const response = await fetch(`/api/user/${session.user.id}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,8 +159,8 @@ export default function RAGChatbot() {
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: data.response || data.error,
-        sources: data.sources || [],
+        content: data.answer || data.error,
+        sources: data.context_used || [],
         timestamp: new Date(),
         isError: !response.ok
       };
@@ -455,15 +454,19 @@ export default function RAGChatbot() {
                           Uploaded Documents ({uploadedFiles.length})
                         </h4>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {uploadedFiles.map((file, idx) => (
-                            <div key={idx} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-                              <FileText className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm flex-1 truncate">{file}</span>
-                              <Badge variant="secondary" className="text-xs">
-                                {file.endsWith('.pdf') ? 'PDF' : 'DOCX'}
-                              </Badge>
-                            </div>
-                          ))}
+                          {uploadedFiles.map((file, idx) => {
+                            const fileName = file.name || file;
+                            const fileType = file.type || (typeof fileName === 'string' ? fileName.split('.').pop()?.toLowerCase() : '');
+                            return (
+                              <div key={idx} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                                <FileText className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm flex-1 truncate">{fileName}</span>
+                                <Badge variant="secondary" className="text-xs">
+                                  {fileType === 'pdf' ? 'PDF' : fileType === 'docx' ? 'DOCX' : fileType?.toUpperCase() || 'FILE'}
+                                </Badge>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}

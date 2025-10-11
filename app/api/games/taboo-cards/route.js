@@ -45,9 +45,9 @@ export async function POST(req) {
     for (let i = 0; i < count; i++) {
       const randomTopic = selectedSubject.topics[Math.floor(Math.random() * selectedSubject.topics.length)]
       
-      // Try to call Flask backend for AI generation
+      // Call our new Next.js taboo card generation API
       try {
-        const flaskResponse = await fetch('http://localhost:5000/api/generate-taboo-card', {
+        const tabooResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/generate-taboo-card`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -56,17 +56,16 @@ export async function POST(req) {
             subject: selectedSubject.name,
             topic: randomTopic,
             difficulty: difficulty
-          }),
-          timeout: 10000
+          })
         })
 
-        if (flaskResponse.ok) {
-          const aiCard = await flaskResponse.json()
+        if (tabooResponse.ok) {
+          const aiCard = await tabooResponse.json()
           cards.push(aiCard)
           continue
         }
-      } catch (flaskError) {
-        console.log('Flask backend not available, using fallback cards')
+      } catch (error) {
+        console.log('Taboo card generation failed, using fallback cards:', error)
       }
 
       // Fallback to predefined cards if Flask is not available

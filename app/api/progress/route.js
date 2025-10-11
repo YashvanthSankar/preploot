@@ -90,7 +90,7 @@ export async function GET(request) {
         targetQuizzes: 2,
         studyTimeTarget: 60,
         xpTarget: 100,
-        videosWatched: 0,
+        completedVideos: 0,
         quizzesTaken: 0,
         studyTimeActual: 0,
         xpEarned: 0
@@ -137,7 +137,7 @@ export async function GET(request) {
         subjectProgress = {
           topicsCompleted: 0,
           totalTopics: 10,
-          videosWatched: 0,
+          completedVideos: 0,
           totalVideos: 50,
           quizzesTaken: 0,
           averageScore: 0
@@ -152,7 +152,7 @@ export async function GET(request) {
     } catch (error) {
       console.error('Database error for stats, using defaults:', error);
       stats = {
-        videosWatched: 0,
+        completedVideos: 0,
         quizzesTaken: 0
       };
     }
@@ -239,13 +239,13 @@ async function getProgressStats(userId, exam = null, subject = null) {
     ]);
 
     return {
-      videosWatched: videoCount,
+      completedVideos: videoCount,
       quizzesTaken: quizCount
     };
   } catch (error) {
     console.error('Error fetching progress stats:', error);
     return {
-      videosWatched: 0,
+      completedVideos: 0,
       quizzesTaken: 0
     };
   }
@@ -278,7 +278,7 @@ async function handleVideoProgress(userId, data) {
     });
 
     // Update daily goal
-    await updateDailyGoal(userId, { videosWatched: 1 });
+    await updateDailyGoal(userId, { completedVideos: 1 });
 
     // Award XP for video completion
     if (completed) {
@@ -358,7 +358,7 @@ async function updateDailyGoal(userId, updates) {
     today.setHours(0, 0, 0, 0);
 
     const incrementData = {};
-    if (updates.videosWatched) incrementData.videosWatched = updates.videosWatched;
+    if (updates.completedVideos) incrementData.completedVideos = updates.completedVideos;
     if (updates.quizzesTaken) incrementData.quizzesTaken = updates.quizzesTaken;
     if (updates.studyTime) incrementData.studyTimeActual = updates.studyTime;
     if (updates.xpEarned) incrementData.xpEarned = updates.xpEarned;

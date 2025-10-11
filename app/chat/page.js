@@ -33,7 +33,6 @@ export default function ChatPage() {
   
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const FLASK_BASE_URL = 'http://localhost:5000';
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
@@ -49,10 +48,10 @@ export default function ChatPage() {
 
   const loadUploadedFiles = async () => {
     try {
-      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/files`);
+      const response = await fetch(`/api/user/${session.user.id}/files`);
       if (response.ok) {
-        const files = await response.json();
-        setUploadedFiles(files);
+        const data = await response.json();
+        setUploadedFiles(data.files || []); // New API returns { files: [...] }
       }
     } catch (error) {
       console.error('Failed to load files:', error);
@@ -63,24 +62,25 @@ export default function ChatPage() {
     if (!session?.user?.id) return;
     
     setIsLoading(true);
-    const formData = new FormData();
     
-    files.forEach(file => {
-      formData.append('files', file);
-    });
-
     try {
-      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/upload/pdf`, {
-        method: 'POST',
-        body: formData,
-      });
+      // Upload files one by one since our new API expects single file
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file); // New API expects 'file' not 'files'
+        
+        const response = await fetch(`/api/user/${session.user.id}/upload/pdf`, {
+          method: 'POST',
+          body: formData,
+        });
 
-      if (response.ok) {
-        toast.success(`Successfully uploaded ${files.length} file(s)`);
-        await loadUploadedFiles();
-      } else {
-        throw new Error('Upload failed');
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
       }
+      
+      toast.success(`Successfully uploaded ${files.length} file(s)`);
+      await loadUploadedFiles();
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload files');
@@ -98,7 +98,7 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${FLASK_BASE_URL}/api/user/${session.user.id}/chat`, {
+      const response = await fetch(`/api/user/${session.user.id}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
