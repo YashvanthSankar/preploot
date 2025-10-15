@@ -53,7 +53,7 @@ export async function POST(request, { params }) {
     await fs.promises.writeFile(filePath, buffer);
     
     // Process the file to extract text
-    const extractedText = await pdfProcessor.processFile(buffer, file.name, file.type);
+    const extractedText = await pdfProcessor.processFile(buffer, file.name, file.type, filePath);
     
     // Initialize embeddings
     await pdfProcessor.initializeEmbeddings();

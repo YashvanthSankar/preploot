@@ -22,13 +22,34 @@ export async function POST(request, { params }) {
     // Extract video ID and get transcript (or fallback text)
     const youtubeData = await YouTubeProcessor.processYouTubeUrl(url);
     
-    // Check if we got actual transcript or just fallback text
-    const hasRealTranscript = !youtubeData.transcript.includes('does not have an available transcript');
+    // Detect content type
+    const isMetadataContent = youtubeData.transcript.includes('VIDEO CONTENT ANALYSIS') && 
+                              youtubeData.transcript.includes('Note: This content is derived from video metadata');
+    const isFallbackContent = 
+      youtubeData.transcript.includes('does not have an available transcript') ||
+      youtubeData.transcript.includes('transcript is not available') ||
+      youtubeData.transcript.includes('fallback when video transcripts are not available') ||
+      youtubeData.transcript.includes('Educational Video Analysis - YouTube Video ID');
     
-    console.log(`Processing YouTube video ${youtubeData.videoId}:`, 
-      hasRealTranscript ? 'Transcript found' : 'Using fallback content');
-    console.log('Transcript length:', youtubeData.transcript.length);
-    console.log('Transcript preview:', youtubeData.transcript.substring(0, 200) + '...');
+    let contentType = 'transcript';
+    let contentMessage = 'YouTube transcript processed successfully';
+    
+    if (isMetadataContent) {
+      contentType = 'metadata';
+      contentMessage = 'YouTube video processed using title and description (captions not available)';
+      console.log('📋 Using video metadata (title, description, keywords)');
+    } else if (isFallbackContent) {
+      contentType = 'fallback';
+      contentMessage = 'YouTube video processed (no content available - using fallback)';
+      console.warn('⚠️  Using fallback content');
+    } else {
+      console.log('✅ Real transcript found!');
+    }
+    
+    console.log(`📺 Processing YouTube video ${youtubeData.videoId}:`);
+    console.log(`📊 Content type: ${contentType}`);
+    console.log('📏 Content length:', youtubeData.transcript.length);
+    console.log('📄 Content preview:', youtubeData.transcript.substring(0, 200) + '...');
 
     // Create PDF processor for this user to handle vector storage
     const pdfProcessor = new PDFProcessor(userId);
@@ -71,15 +92,15 @@ export async function POST(request, { params }) {
     await pdfProcessor.addTextsToVectorstore(texts, metadatas);
 
     return NextResponse.json({
-      message: hasRealTranscript 
-        ? 'YouTube transcript processed successfully'
-        : 'YouTube video processed (no transcript available - using fallback content)',
+      message: contentMessage,
       video_id: youtubeData.videoId,
       url: youtubeData.url,
       chunks_processed: chunks.length,
       user_id: userId,
       cache_id: `yt_${userId}_${youtubeData.videoId}`,
-      has_transcript: hasRealTranscript
+      content_type: contentType,
+      has_transcript: contentType === 'transcript',
+      has_metadata: contentType === 'metadata'
     });
 
   } catch (error) {

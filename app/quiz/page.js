@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Footer } from "@/components/footer";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Clock, CheckCircle, XCircle, Trophy, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
-export default function QuizPage() {
+function QuizPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -508,5 +508,17 @@ export default function QuizPage() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+export default function QuizPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading quiz...</div>
+      </div>
+    }>
+      <QuizPageContent />
+    </Suspense>
   );
 }

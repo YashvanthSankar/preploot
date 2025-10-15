@@ -50,7 +50,7 @@ export async function POST(request, { params }) {
 
     // Initialize Google Gemini client
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
     // Create chat prompt
     const chatPrompt = `You are a helpful AI assistant that answers questions based on the provided context from the user's documents. 

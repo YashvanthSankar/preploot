@@ -122,7 +122,7 @@ function TopicLearningContent() {
               <div className="p-3 bg-gradient-to-br from-primary via-purple-500 to-pink-500 rounded-full shadow-lg">
                 <BookOpen className="h-8 w-8 text-white" />
               </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold text-foreground">
                 {currentTopic}
               </h1>
             </div>

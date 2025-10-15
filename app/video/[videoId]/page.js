@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { VideoPlayer } from '@/components/video-player';
 import { VideoSidebar } from '@/components/video-sidebar';
 import { ProgressTracker } from '@/components/progress-tracker';
@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Share2, BookOpen, Play } from 'lucide-react';
 import Link from 'next/link';
 
-export default function VideoPage() {
+function VideoPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const videoId = params.videoId;
   
   // Get video metadata from URL parameters
@@ -100,12 +101,14 @@ export default function VideoPage() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between px-4">
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
             <div className="hidden md:block">
               <h1 className="font-semibold text-lg">PrepLoot Video Player</h1>
               {exam && subject && (
@@ -190,5 +193,17 @@ export default function VideoPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function VideoPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading video...</div>
+      </div>
+    }>
+      <VideoPageContent />
+    </Suspense>
   );
 }

@@ -23,7 +23,6 @@ import {
   Flame,
   Crown,
   Gamepad2,
-  Map,
   Sword
 } from 'lucide-react';
 import { DailyCheckin } from '@/components/daily-checkin';
@@ -206,33 +205,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Action Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* Game Map Card */}
-          <Card className="group hover:shadow-2xl hover:-translate-y-2 transition-all border-2 hover:border-purple-500/50 bg-gradient-to-br from-card via-purple-50/30 to-pink-50/30 dark:from-card dark:via-purple-900/20 dark:to-pink-900/20">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                  <Map className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Learning Map
-                  </CardTitle>
-                  <CardDescription>Navigate your learning journey</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Link href="/map">
-                <Button variant="default" className="w-full group">
-                  <Map className="w-4 h-4 mr-2" />
-                  Enter Learning Map
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           {/* Games Portal */}
           <Card className="group hover:shadow-2xl hover:-translate-y-2 transition-all border-2 hover:border-blue-500/50 bg-gradient-to-br from-card via-blue-50/30 to-cyan-50/30 dark:from-card dark:via-blue-900/20 dark:to-cyan-900/20">

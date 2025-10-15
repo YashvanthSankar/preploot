@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -144,7 +144,7 @@ const bossQuestions = {
   }
 }
 
-export default function BossFightPage() {
+function BossFightContent() {
   const { data: session } = useSession()
   const searchParams = useSearchParams()
   const bossId = searchParams.get('boss')
@@ -388,9 +388,9 @@ export default function BossFightPage() {
                 <Sword className="h-4 w-4 mr-2" />
                 Fight Again
               </Button>
-              <Button onClick={() => window.location.href = '/map'} variant="default" className="flex-1">
+              <Button onClick={() => window.location.href = '/dashboard'} variant="default" className="flex-1">
                 <ArrowRight className="h-4 w-4 mr-2" />
-                Continue Journey
+                Back to Dashboard
               </Button>
             </div>
           </CardContent>
@@ -415,9 +415,9 @@ export default function BossFightPage() {
                 <Sword className="h-4 w-4 mr-2" />
                 Try Again
               </Button>
-              <Button onClick={() => window.location.href = '/map'} variant="outline" className="flex-1">
+              <Button onClick={() => window.location.href = '/dashboard'} variant="outline" className="flex-1">
                 <Shield className="h-4 w-4 mr-2" />
-                Retreat to Map
+                Back to Dashboard
               </Button>
             </div>
           </CardContent>
@@ -531,5 +531,17 @@ export default function BossFightPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function BossFightPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-red-900 to-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading Boss Fight...</div>
+      </div>
+    }>
+      <BossFightContent />
+    </Suspense>
   )
 }

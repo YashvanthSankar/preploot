@@ -127,6 +127,13 @@ export function YouTubeVideos({ exam, subject, isVisible }) {
     router.push(`/video/${videoId}?${params.toString()}`);
   };
 
+  // Auto-fetch videos when component becomes visible or exam/subject changes
+  useEffect(() => {
+    if (isVisible && exam && subject) {
+      console.log('🎬 Auto-fetching videos for:', exam, subject);
+      fetchVideos();
+    }
+  }, [isVisible, exam, subject]); // Re-fetch when these change
 
   if (!isVisible) return null;
 

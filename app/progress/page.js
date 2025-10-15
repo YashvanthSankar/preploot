@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +22,7 @@ import {
   Flame
 } from 'lucide-react';
 
-export default function ProgressDashboard() {
+function ProgressDashboardContent() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const [dashboardData, setDashboardData] = useState(null);
@@ -323,5 +323,17 @@ export default function ProgressDashboard() {
         </TabsContent>
       </Tabs>
       </div>
+  );
+}
+
+export default function ProgressDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading progress...</div>
+      </div>
+    }>
+      <ProgressDashboardContent />
+    </Suspense>
   );
 }

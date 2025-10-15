@@ -1,12 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, Target, Trophy, Play } from "lucide-react";
 
-export default function SubjectLearning() {
+function SubjectLearningContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [examData, setExamData] = useState(null);
@@ -193,5 +193,17 @@ export default function SubjectLearning() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+export default function SubjectLearning() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    }>
+      <SubjectLearningContent />
+    </Suspense>
   );
 }
